@@ -16,22 +16,43 @@ class DefaultProcessor implements FileProcessorInterface
         return true; // Captura cualquier archivo no procesado previamente
     }
 
+    
     public function process(UploadedFile $file): array
     {
-        $ext = strtolower($file->getClientOriginalExtension());
-        $type = 'document';
+        $extension = strtolower($file->getClientOriginalExtension());
 
-        if (in_array($ext, $this->audioExtensions)) {
-            $type = 'audio';
-        } elseif (in_array($ext, $this->videoExtensions)) {
-            $type = 'video';
-        } elseif (in_array($ext, $this->docExtensions)) {
-            $type = 'document';
+        if (in_array($extension, $this->videoExtensions, true)) {
+            return [
+                'file_type' => 'video',
+                'mime_type' => match ($extension) {
+                    'ogv' => 'video/ogg',
+                    'webm' => 'video/webm',
+                    'mp4' => 'video/mp4',
+                    default => $file->getMimeType() ?: 'application/octet-stream',
+                },
+            ];
+        }
+
+        if (in_array($extension, $this->audioExtensions, true)) {
+            return [
+                'file_type' => 'audio',
+                'mime_type' => match ($extension) {
+                    'ogg' => 'audio/ogg',
+                    'mp3' => 'audio/mpeg',
+                    'wav' => 'audio/wav',
+                    default => $file->getMimeType() ?: 'application/octet-stream',
+                },
+            ];
         }
 
         return [
-            'file_type' => $type,
-            'mime_type' => $file->getClientMimeType(),
+            'file_type' => 'document',
+            'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
         ];
+    }
+
+    public function getContentsTree(string $filePath): array
+    {
+        return [];
     }
 }

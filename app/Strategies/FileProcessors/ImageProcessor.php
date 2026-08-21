@@ -24,4 +24,9 @@ class ImageProcessor implements FileProcessorInterface
             'mime_type' => $file->getClientMimeType(),
         ];
     }
+
+    public function getContentsTree(string $filePath): array
+    {
+        return [];
+    }
 }

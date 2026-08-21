@@ -119,9 +119,21 @@
     </main>
 
     <!-- PIE DE PÁGINA -->
-    <footer class="bg-slate-800 border-t border-slate-700 py-6 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4">
-            <p>CorRol — Gestor Ágil de Campañas de Rol | Desarrollado con Laravel & Tailwind CSS</p>
+    <footer class="bg-slate-800 border-t border-slate-700 py-6 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>
+                CorRol &copy; {{ date('Y') }} — Gestor Ágil de Campañas de Rol | Desarrollado por 
+                <a href="https://ocanyaweb.es/presentacion/contacto" target="_blank" class="text-slate-400 hover:text-indigo-400 font-semibold underline">
+                    Ricardo Ocaña
+                </a>
+            </p>
+            <div class="flex items-center space-x-4">
+                <a href="{{ route('legal') }}" class="text-slate-400 hover:text-indigo-400 transition-colors">
+                    Aviso Legal &amp; Privacidad
+                </a>
+                <span>&bull;</span>
+                <span class="text-slate-400">Licencia MIT</span>
+            </div>
         </div>
     </footer>
     

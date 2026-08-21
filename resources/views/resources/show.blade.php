@@ -140,6 +140,17 @@
                 $type = $file->file_type;
                 $metadata = $file->metadata ?? [];
                 $isPdf = $type === 'pdf' || str_ends_with(strtolower(parse_url($fileUrl ?? '', PHP_URL_PATH) ?? ''), '.pdf');
+            
+                // Detección de Google Docs / Google Sheets / Google Drive
+                $isGoogleDoc = false;
+                $googleEmbedUrl = $fileUrl;
+                if ($file->is_external && (str_contains($fileUrl, 'docs.google.com') || str_contains($fileUrl, 'drive.google.com'))) {
+                    $isGoogleDoc = true;
+                    // Adaptamos la URL para incrustación limpia
+                    if (str_contains($fileUrl, '/edit')) {
+                        $googleEmbedUrl = preg_replace('/\/edit.*$/', '/preview', $fileUrl);
+                    }
+                }
             @endphp
 
             @if($type === 'image')
@@ -322,34 +333,141 @@
                     });
                 </script>
 
-            <!-- VISOR 3: DOCUMENTOS OFFICE -->
+            <!-- VISOR 3: DOCUMENTOS (Google Docs / Sheets vs Office Viewer) -->
             @elseif($type === 'document')
-                <iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($fileUrl) }}" class="w-full h-[650px] rounded-lg border border-slate-700"></iframe>
-
+                @if($isGoogleDoc)
+                    <div class="w-full space-y-4">
+                        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                            <span class="text-slate-300 font-semibold flex items-center gap-2">
+                                📊 Documento / Hoja de Cálculo de Google
+                            </span>
+                            <a href="{{ $fileUrl }}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-md transition-colors shadow flex items-center gap-1.5">
+                                ↗️ Abrir y Editar en Google
+                            </a>
+                        </div>
+                        <iframe src="{{ $googleEmbedUrl }}" class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"></iframe>
+                    </div>
+                @else
+                    <div class="w-full space-y-4">
+                        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($fileUrl) }}" class="w-full h-[650px] rounded-lg border border-slate-700"></iframe>
+                    </div>
+                @endif
+            
             @elseif($type === 'audio')
                 <div class="w-full max-w-md p-6 bg-slate-900 rounded-xl text-center space-y-4">
                     <p class="text-indigo-400 font-semibold">🎵 Reproductor de Audio</p>
-                    <audio controls class="w-full">
-                        <source src="{{ $fileUrl }}">
+
+                    <audio
+                        id="resource-audio"
+                        controls
+                        preload="metadata"
+                        class="w-full"
+                    >
+                        <source
+                            src="{{ $fileUrl }}"
+                            type="{{ $file->mime_type ?: 'audio/ogg' }}"
+                        >
+                        Tu navegador no puede reproducir este archivo de audio.
                     </audio>
                 </div>
 
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const audio = document.getElementById('resource-audio');
+
+                        if (!audio) {
+                            return;
+                        }
+
+                        audio.addEventListener('ended', function () {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.load();
+                        });
+
+                        audio.addEventListener('play', function () {
+                            if (
+                                Number.isFinite(audio.duration) &&
+                                audio.currentTime >= audio.duration
+                            ) {
+                                audio.currentTime = 0;
+                            }
+                        });
+                    });
+                </script>
+
             @elseif($type === 'video')
-                <video controls class="w-full max-h-[600px] rounded-lg border border-slate-700">
-                    <source src="{{ $fileUrl }}">
+                <video
+                    controls
+                    preload="metadata"
+                    class="w-full max-h-[600px] rounded-lg border border-slate-700"
+                >
+                    <source
+                        src="{{ $fileUrl }}"
+                        type="{{ $file->mime_type ?: 'video/mp4' }}"
+                    >
+                    Tu navegador no puede reproducir este vídeo.
                 </video>
 
+            <!-- VISOR 6: ARCHIVOS COMPRIMIDOS (ZIP, TAR.GZ, TGZ, RAR, 7Z) -->
             @elseif($type === 'zip')
+                @php
+                    $formatLabel = strtoupper($metadata['archive_format'] ?? 'Comprimido');
+                    $treeList = !empty($fileTree) ? $fileTree : ($metadata['structure'] ?? []);
+                @endphp
                 <div class="w-full space-y-4">
-                    <h3 class="text-lg font-bold text-indigo-400">📦 Contenido del Archivo Comprimido</h3>
-                    @if(isset($metadata['structure']) && count($metadata['structure']) > 0)
-                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm max-h-[400px] overflow-y-auto space-y-1 border border-slate-700">
-                            @foreach($metadata['structure'] as $item)
-                                <div class="flex justify-between {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }}">
-                                    <span>{{ $item['is_dir'] ? '📁' : '📄' }} {{ $item['name'] }}</span>
-                                    <span class="text-slate-500 text-xs">{{ $item['size'] > 0 ? number_format($item['size'] / 1024, 1) . ' KB' : '' }}</span>
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                        <span class="text-indigo-300 font-bold flex items-center gap-2">
+                            📦 Estructura del Archivo ({{ $formatLabel }})
+                        </span>
+                        @if(count($treeList) > 0)
+                            <span class="text-slate-400">{{ count($treeList) }} elementos encontrados</span>
+                        @endif
+                    </div>
+
+                    @if(count($treeList) > 0)
+                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm max-h-[500px] overflow-y-auto space-y-1 border border-slate-700 select-text">
+                            @foreach($treeList as $item)
+                                @php
+                                    $cleanPath = rtrim($item['path'] ?? $item['name'], '/');
+                                    $depth = $cleanPath !== '' ? substr_count($cleanPath, '/') : 0;
+                                    $paddingClass = match (min($depth, 6)) {
+                                        1 => 'pl-5',
+                                        2 => 'pl-10',
+                                        3 => 'pl-15',
+                                        4 => 'pl-20',
+                                        5 => 'pl-25',
+                                        6 => 'pl-30',
+                                        default => 'pl-0',
+                                    };
+                                @endphp
+                                <div class="flex justify-between items-center py-1 border-b border-slate-800/50 hover:bg-slate-800/50 rounded px-2 transition-colors {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }}" 
+                                     class="{{ $paddingClass }}">
+                                    
+                                    <span class="truncate pr-4 flex items-center gap-2">
+                                        <span class="text-base leading-none">{{ $item['is_dir'] ? '📁' : '📄' }}</span>
+                                        <span class="font-semibold">{{ $item['name'] }}</span>
+                                        <span class="text-slate-500 font-normal text-xs hidden md:inline">({{ $cleanPath }})</span>
+                                    </span>
+
+                                    <span class="text-slate-500 text-xs shrink-0 font-mono">
+                                        @if($item['is_dir'])
+                                            <span class="bg-indigo-950 text-indigo-400 text-[10px] px-1.5 py-0.5 rounded border border-indigo-800/40">Carpeta</span>
+                                        @else
+                                            {{ $item['size'] > 0 ? number_format($item['size'] / 1024, 1) . ' KB' : '0 KB' }}
+                                        @endif
+                                    </span>
                                 </div>
                             @endforeach
+                        </div>
+                    @else
+                        <div class="p-6 bg-slate-900 rounded-lg border border-slate-700 text-center space-y-3">
+                            <p class="text-slate-400 text-sm">Contenido empaquetado en formato {{ $formatLabel }}.</p>
+                            @if($fileUrl)
+                                <a href="{{ $fileUrl }}" download target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow">
+                                    ⬇️ Descargar {{ $formatLabel }} Completo
+                                </a>
+                            @endif
                         </div>
                     @endif
                 </div>

@@ -74,3 +74,7 @@ Route::get('/sheets/create-guest', function() {
 })->name('sheets.guest');
 
 Route::get('/resources/{id}/stream', [ResourceController::class, 'streamPdf'])->name('resources.stream');
+
+Route::get('/legal', function () {
+    return view('legal');
+})->name('legal');

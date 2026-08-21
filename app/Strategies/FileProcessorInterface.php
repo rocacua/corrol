@@ -15,4 +15,6 @@ interface FileProcessorInterface
      * Procesa el archivo y devuelve un array con sus metadatos específicos.
      */
     public function process(UploadedFile $file): array;
+    
+    public function getContentsTree(string $filePath): array;
 }

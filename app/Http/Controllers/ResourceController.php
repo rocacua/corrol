@@ -70,6 +70,7 @@ class ResourceController extends Controller
         }
 
         $fileUrl = null;
+        $fileTree = [];
         if ($resource->type === 'file' && $resource->resourceable) {
             $resourceFile = $resource->resourceable;
 
@@ -77,10 +78,12 @@ class ResourceController extends Controller
                 $fileUrl = $resourceFile->file_path_or_url;
             } else {
                 $fileUrl = $this->uploadService->getFileUrl($resourceFile->file_path_or_url, 15);
+                // Invocamos la lógica del árbol desde el servicio
+                $fileTree = $this->uploadService->getFileTree($resourceFile->file_path_or_url);
             }
         }
 
-        return view('resources.show', compact('resource', 'fileUrl'));
+        return view('resources.show', compact('resource', 'fileUrl', 'fileTree'));
     }
 
     public function edit(int $id): View

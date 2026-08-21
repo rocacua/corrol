@@ -32,7 +32,7 @@
             </span>
         </div>
         <div class="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
-            <div class="h-2.5 rounded-full {{ $isLowStorage ? 'bg-rose-500' : 'bg-indigo-500' }}" style="width: {{ $barWidth }};"></div>
+            <div id="storage-progress-bar" class="h-2.5 rounded-full {{ $isLowStorage ? 'bg-rose-500' : 'bg-indigo-500' }}" data-width="{{ max(0.5, $percentageUsed) }}"></div>
         </div>
     </div>
 
@@ -77,7 +77,13 @@
         </div>
     @endif
     
-    <form action="{{ route('resources.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form
+        id="resource-upload-form"
+        action="{{ route('resources.store') }}"
+        method="POST"
+        enctype="multipart/form-data"
+        class="space-y-6"
+    >
         @csrf
 
         <div>
@@ -181,7 +187,11 @@
             </div>
         </div>
 
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">
+        <button
+            id="resource-submit-button"
+            type="submit"
+            class="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-75 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg"
+        >
             Guardar Recurso
         </button>
     </form>
@@ -189,6 +199,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Asignación de ancho de barra de progreso sin alertas de CSS
+        const progressBar = document.getElementById('storage-progress-bar');
+        if (progressBar) {
+            const widthVal = progressBar.getAttribute('data-width') || '0.5';
+            progressBar.style.width = widthVal + '%';
+        }
+
         const input = document.getElementById('tags-input');
         const buttons = document.querySelectorAll('.tag-suggestion-btn');
 
@@ -209,6 +226,24 @@
                 }
             });
         });
+
+        const uploadForm = document.getElementById('resource-upload-form');
+        const submitButton = document.getElementById('resource-submit-button');
+
+        if (uploadForm && submitButton) {
+            let isSubmitting = false;
+
+            uploadForm.addEventListener('submit', function (event) {
+                if (isSubmitting) {
+                    event.preventDefault();
+                    return;
+                }
+
+                isSubmitting = true;
+                submitButton.disabled = true;
+                submitButton.textContent = 'Subiendo recurso...';
+            });
+        }
     });
 </script>
 @endsection

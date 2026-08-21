@@ -19,4 +19,9 @@ class PdfProcessor implements FileProcessorInterface
             'mime_type' => 'application/pdf',
         ];
     }
+
+    public function getContentsTree(string $filePath): array
+    {
+        return [];
+    }
 }

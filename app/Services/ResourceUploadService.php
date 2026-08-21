@@ -10,6 +10,8 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use App\Services\FileProcessorFactory;
+use Illuminate\Support\Facades\Log;
 
 class ResourceUploadService
 {
@@ -41,7 +43,16 @@ class ResourceUploadService
         
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('b2');
-        $path = $disk->putFileAs('resources', $file, $fileName);
+        $mimeType = $file->getMimeType() ?: $file->getClientMimeType();
+
+        $path = $disk->putFileAs(
+            'resources',
+            $file,
+            $fileName,
+            [
+                'ContentType' => $mimeType,
+            ]
+        );
 
         $data['size_in_bytes'] = $file->getSize();
         $data['is_external'] = false;
@@ -171,7 +182,9 @@ class ResourceUploadService
                 'file_path_or_url' => $path,
                 'is_external' => false,
                 'file_type' => $metadata['file_type'] ?? 'document',
-                'mime_type' => $newFile->getClientMimeType(),
+                'mime_type' => $metadata['mime_type']
+                    ?? $newFile->getMimeType()
+                    ?? $newFile->getClientMimeType(),
                 'size_in_bytes' => $newFile->getSize(),
                 'metadata' => $metadata,
             ]);
@@ -215,9 +228,64 @@ class ResourceUploadService
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('b2');
 
+        $mimeType = $resourceFile->mime_type ?: match ($resourceFile->file_type) {
+            'audio' => 'audio/ogg',
+            'video' => 'video/mp4',
+            'pdf' => 'application/pdf',
+            'image' => 'image/*',
+            default => 'application/octet-stream',
+        };
+
         return $disk->response($resourceFile->file_path_or_url, null, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($resourceFile->file_path_or_url) . '"'
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' .
+                basename($resourceFile->file_path_or_url) . '"',
+            'Accept-Ranges' => 'bytes',
         ]);
+    }
+
+    /**
+     * Obtiene el árbol de archivos/directorios descargando temporalmente el archivo de B2.
+     */
+    public function getFileTree(string $filePath): array
+    {
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        
+        if (str_ends_with(strtolower($filePath), '.tar.gz') || str_ends_with(strtolower($filePath), '.tgz')) {
+            $extension = 'tar.gz';
+        }
+
+        if (!in_array($extension, ['zip', 'tar.gz', 'tgz', 'gz', 'tar'])) {
+            return [];
+        }
+
+        $tempPath = sys_get_temp_dir() . '/' . uniqid('res_tree_') . '.' . $extension;
+
+        try {
+            /** @var FilesystemAdapter $disk */
+            $disk = Storage::disk('b2');
+
+            if (!$disk->exists($filePath)) {
+                return [];
+            }
+
+            $fileContent = $disk->get($filePath);
+            file_put_contents($tempPath, $fileContent);
+
+            $processor = FileProcessorFactory::make($extension);
+            $tree = $processor->getContentsTree($tempPath);
+
+            if (file_exists($tempPath)) {
+                @unlink($tempPath);
+            }
+
+            return $tree;
+        } catch (\Throwable $e) {
+            Log::error("Error en getFileTree: " . $e->getMessage());
+            if (file_exists($tempPath)) {
+                @unlink($tempPath);
+            }
+            return [];
+        }
     }
 }
