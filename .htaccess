@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si la petición busca un archivo o carpeta real dentro de public/, sírvelo directamente
+    RewriteCond %{REQUEST_URI} !^/corrol/public/
+    RewriteCond %{DOCUMENT_ROOT}/corrol/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/corrol/public/$1 -d
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Para cualquier otra ruta de Laravel, canalízala al front controller de public
+    RewriteCond %{REQUEST_URI} !^/corrol/public/
+    RewriteRule ^(.*)$ public/index.php [L,QSA]
+</IfModule>
