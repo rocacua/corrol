@@ -27,7 +27,7 @@
                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
 
-        <div class="flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center justify-between text-xs text-slate-300">
             <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="remember" class="rounded bg-slate-900 border-slate-700 text-indigo-600">
                 <span>Recordarme</span>
@@ -39,7 +39,7 @@
         </button>
     </form>
 
-    <p class="text-center text-xs text-slate-400 mt-6">
+    <p class="text-center text-xs text-slate-300 mt-6">
         ¿No tienes cuenta? <a href="{{ route('register') }}" class="text-indigo-400 hover:underline">Regístrate gratis</a>
     </p>
 </div>

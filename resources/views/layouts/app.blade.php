@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'CorRol - Gestor de Rol')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ asset('assets/icono_corrol_16px_opt.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ asset('assets/icono_corrol_32px_opt.png') }}">
+    <link rel="apple-touch-icon" sizes="512x512"
+        href="{{ asset('assets/icono_corrol_512px_opt.png') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
 
@@ -14,8 +21,9 @@
             
             <!-- Logo & Enlaces Principales (Escritorio) -->
             <div class="flex items-center space-x-6">
-                <a href="{{ route('resources.index') }}" class="text-2xl font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2">
-                    🎲 <span>CorRol</span>
+                <a href="{{ route('resources.index') }}" class="text-2xl font-bold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2" aria-label="CorRol">
+                    <img src="{{ asset('assets/logo_corrol_opt.png') }}" alt="CorRol" class="hidden sm:block w-[120px] h-8 object-contain">
+                    <img src="{{ asset('assets/icono_corrol_opt.png') }}" alt="CorRol" class="sm:hidden w-9 h-9 object-contain">
                 </a>
 
                 <!-- Menú Navegación Escritorio -->
@@ -55,7 +63,7 @@
 
             <!-- Botón de Menú Hamburguesa (SOLO MÓVIL: Visibilidad controlada con 'lg:hidden') -->
             <div class="flex lg:hidden">
-                <button id="mobile-menu-button" type="button" class="text-slate-400 hover:text-white focus:outline-none p-2 rounded-lg bg-slate-900 border border-slate-700">
+                <button id="mobile-menu-button" type="button" class="text-slate-300 hover:text-white focus:outline-none p-2 rounded-lg bg-slate-900 border border-slate-700">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -119,20 +127,20 @@
     </main>
 
     <!-- PIE DE PÁGINA -->
-    <footer class="bg-slate-800 border-t border-slate-700 py-6 text-xs text-slate-500">
+    <footer class="bg-slate-800 border-t border-slate-700 py-6 text-xs text-slate-400">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p>
                 CorRol &copy; {{ date('Y') }} — Gestor Ágil de Campañas de Rol | Desarrollado por 
-                <a href="https://ocanyaweb.es/presentacion/contacto" target="_blank" class="text-slate-400 hover:text-indigo-400 font-semibold underline">
+                <a href="https://ocanyaweb.es/presentacion/contacto" target="_blank" class="text-slate-300 hover:text-indigo-400 font-semibold underline">
                     Ricardo Ocaña
                 </a>
             </p>
             <div class="flex items-center space-x-4">
-                <a href="{{ route('legal') }}" class="text-slate-400 hover:text-indigo-400 transition-colors">
+                <a href="{{ route('legal') }}" class="text-slate-300 hover:text-indigo-400 transition-colors">
                     Aviso Legal &amp; Privacidad
                 </a>
                 <span>&bull;</span>
-                <span class="text-slate-400">Licencia MIT</span>
+                <span class="text-slate-300">Licencia MIT</span>
             </div>
         </div>
     </footer>

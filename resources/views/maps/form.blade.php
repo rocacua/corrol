@@ -22,10 +22,10 @@
                         <a href="?edit_id={{ $res->id }}" 
                            class="block p-3 rounded-lg border text-xs transition-all {{ ($editingResource && $editingResource->id === $res->id) ? 'bg-indigo-950 border-indigo-500 text-white font-bold' : 'bg-slate-900 border-slate-700/60 text-slate-300 hover:border-indigo-500' }}">
                             <div class="truncate">🗺️ {{ $res->title }}</div>
-                            <div class="text-[10px] text-slate-500 mt-1">{{ $res->created_at->format('d/m/Y') }}</div>
+                            <div class="text-[10px] text-slate-400 mt-1">{{ $res->created_at->format('d/m/Y') }}</div>
                         </a>
                     @empty
-                        <p class="text-xs text-slate-500 italic">No tienes ningún mapa aún.</p>
+                        <p class="text-xs text-slate-400 italic">No tienes ningún mapa aún.</p>
                     @endforelse
                 </div>
             </div>
@@ -102,7 +102,7 @@
                         <span id="pin-count" class="text-xs text-indigo-400 font-bold">0 Pines añadidos</span>
                     </div>
                     <div id="map-canvas" data-markers='{!! json_encode($editingResource && $editingResource->resourceable ? ($editingResource->resourceable->markers ?? []) : []) !!}' class="w-full h-[450px] bg-slate-900 border border-slate-700 rounded-lg overflow-hidden relative">
-                        <div id="map-placeholder" class="h-full flex items-center justify-center text-slate-500 text-sm">
+                        <div id="map-placeholder" class="h-full flex items-center justify-center text-slate-400 text-sm">
                             Introduce una URL de imagen de mapa arriba para cargar el lienzo interactivo.
                         </div>
                     </div>

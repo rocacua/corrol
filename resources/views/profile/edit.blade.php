@@ -9,7 +9,7 @@
     <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex items-center justify-between">
         <div>
             <h3 class="text-lg font-bold text-slate-100">📂 Mis Recursos</h3>
-            <p class="text-xs text-slate-400">Total de recursos creados: {{ $user->resources()->count() }}</p>
+            <p class="text-xs text-slate-300">Total de recursos creados: {{ $user->resources()->count() }}</p>
         </div>
         <a href="{{ route('resources.index', ['user_id' => $user->id]) }}" 
            class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-md transition-colors">

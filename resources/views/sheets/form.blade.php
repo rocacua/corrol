@@ -21,10 +21,10 @@
                         <a href="?edit_id={{ $res->id }}" 
                            class="block p-3 rounded-lg border text-xs transition-all {{ ($editingResource && $editingResource->id === $res->id) ? 'bg-indigo-950 border-indigo-500 text-white font-bold' : 'bg-slate-900 border-slate-700/60 text-slate-300 hover:border-indigo-500' }}">
                             <div class="truncate">{{ $res->title }}</div>
-                            <div class="text-[10px] text-slate-500 mt-1">{{ $res->created_at->format('d/m/Y') }}</div>
+                            <div class="text-[10px] text-slate-400 mt-1">{{ $res->created_at->format('d/m/Y') }}</div>
                         </a>
                     @empty
-                        <p class="text-xs text-slate-500 italic">No tienes ningún registro aún.</p>
+                        <p class="text-xs text-slate-400 italic">No tienes ningún registro aún.</p>
                     @endforelse
                 </div>
             </div>

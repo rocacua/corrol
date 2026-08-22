@@ -7,9 +7,9 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-bold text-indigo-400">✏️ Editar Recurso</h1>
-             <p class="text-slate-400 text-sm">Modifica los metadatos o reemplaza el archivo/URL.</p>
+             <p class="text-slate-300 text-sm">Modifica los metadatos o reemplaza el archivo/URL.</p>
         </div>
-        <a href="{{ route('resources.show', $resource->id) }}" class="text-slate-400 hover:text-slate-200 text-sm">
+        <a href="{{ route('resources.show', $resource->id) }}" class="text-slate-300 hover:text-slate-200 text-sm">
             ← Cancelar
         </a>
     </div>
@@ -107,8 +107,8 @@
                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none">
             
             @if(!empty($allTags))
-                <div class="mt-2 flex flex-wrap gap-2 items-center text-xs text-slate-400">
-                    <span class="font-semibold text-slate-500">Sugerencias:</span>
+                <div class="mt-2 flex flex-wrap gap-2 items-center text-xs text-slate-300">
+                    <span class="font-semibold text-slate-400">Sugerencias:</span>
                     @foreach ($allTags as $tag)
                         <button type="button" onclick="appendTag('{{ $tag }}')" 
                                 class="bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white px-2 py-1 rounded-md transition-colors cursor-pointer">
@@ -131,13 +131,13 @@
             @if($resource->type === 'file' && $resource->resourceable)
                 @php $file = $resource->resourceable; @endphp
                 <div class="p-3 bg-slate-900 rounded-lg border border-slate-700 text-xs space-y-1">
-                    <span class="text-slate-400 font-semibold block">Origen Actual:</span>
+                    <span class="text-slate-300 font-semibold block">Origen Actual:</span>
                     @if($file->is_external)
                         <p class="text-indigo-300 break-all">🌐 Enlace Externo: {{ $file->file_path_or_url }}</p>
                     @else
                         <p class="text-emerald-300">📁 Archivo almacenado en la nube (Backblaze B2)</p>
                         @if($file->size_in_bytes)
-                            <p class="text-slate-400">Tamaño: {{ number_format($file->size_in_bytes / 1024, 1) }} KB</p>
+                            <p class="text-slate-300">Tamaño: {{ number_format($file->size_in_bytes / 1024, 1) }} KB</p>
                         @endif
                     @endif
                 </div>
@@ -157,10 +157,10 @@
             <div>
                 <label class="block text-sm font-medium mb-1">Subir Nuevo Archivo (Reemplazará al actual)</label>
                 <input type="file" name="file" 
-                       class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer text-sm">
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer text-sm">
             </div>
 
-            <div class="text-center text-xs text-slate-500 font-bold">— Ó —</div>
+            <div class="text-center text-xs text-slate-400 font-bold">— Ó —</div>
 
             <!-- Opción 2: Nueva URL Externa -->
             <div>

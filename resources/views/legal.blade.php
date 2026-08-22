@@ -7,7 +7,7 @@
     
     <div>
         <h1 class="text-3xl font-bold text-indigo-400 mb-2">⚖️ Términos de Uso y Aviso Legal</h1>
-        <p class="text-xs text-slate-400">Última actualización: {{ date('Y') }}</p>
+        <p class="text-xs text-slate-300">Última actualización: {{ date('Y') }}</p>
     </div>
 
     <!-- 1. Naturaleza de la Plataforma -->

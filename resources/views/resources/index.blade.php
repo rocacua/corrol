@@ -37,7 +37,7 @@
                 @endforeach
             </select>
 
-            <a href="{{ route('resources.index') }}" class="text-slate-400 hover:text-slate-200 text-center self-center">
+            <a href="{{ route('resources.index') }}" class="text-slate-300 hover:text-slate-200 text-center self-center">
                 Limpiar Filtros
             </a>
         </div>
@@ -55,7 +55,7 @@
                         <span class="text-xs {{ $resource->privacy === 'private' ? 'text-amber-400' : 'text-emerald-400' }}">
                             {{ ucfirst($resource->privacy) }}
                         </span>
-                        <span class="text-xs text-slate-400">
+                        <span class="text-xs text-slate-300">
                             <strong class="text-slate-200">
                                 {{ $resource->game ?? 'General' }}/{{ $resource->category ?? '' }}/{{ $resource->author ?? 'Anónimo' }}
                             </strong>
@@ -66,10 +66,10 @@
                             {{ $resource->title }}
                         </a>
                     </h2>
-                    <p class="text-slate-400 text-sm line-clamp-2 mb-4">{{ $resource->description ?? 'Sin descripción' }}</p>
+                    <p class="text-slate-300 text-sm line-clamp-2 mb-4">{{ $resource->description ?? 'Sin descripción' }}</p>
                 </div>
 
-                <div class="pt-3 border-t border-slate-700/60 flex justify-between items-center text-xs text-slate-500">
+                <div class="pt-3 border-t border-slate-700/60 flex justify-between items-center text-xs text-slate-400">
                     <span>Subido por: <strong class="text-slate-300">{{ $resource->user->name ?? 'Anónimo' }}</strong></span>
                     <a href="{{ route('resources.show', $resource->id) }}" class="text-indigo-400 hover:underline font-bold">
                         Ver Recurso →
@@ -77,7 +77,7 @@
                 </div>
             </div>
         @empty
-            <div class="col-span-3 text-center py-12 text-slate-500">
+            <div class="col-span-3 text-center py-12 text-slate-400">
                 No se encontraron recursos que coincidan con la búsqueda.
             </div>
         @endforelse

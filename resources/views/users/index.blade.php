@@ -5,7 +5,7 @@
 @section('content')
 <div class="space-y-6">
     <h1 class="text-3xl font-bold text-indigo-400">👥 Autores y Creadores</h1>
-    <p class="text-slate-400 text-sm">Listado de usuarios registrados en la plataforma.</p>
+    <p class="text-slate-300 text-sm">Listado de usuarios registrados en la plataforma.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         @forelse($users as $user)
@@ -16,7 +16,7 @@
                     </span>
                     <div>
                         <h3 class="font-bold text-base text-slate-100">{{ $user->name }}</h3>
-                        <p class="text-xs text-slate-400">{{ $user->resources_count }} {{ $user->resources_count === 1 ? 'recurso público' : 'recursos públicos' }}</p>
+                        <p class="text-xs text-slate-300">{{ $user->resources_count }} {{ $user->resources_count === 1 ? 'recurso público' : 'recursos públicos' }}</p>
                     </div>
                 </div>
                 <a href="{{ route('resources.index', ['user_id' => $user->id]) }}" class="bg-slate-700 hover:bg-indigo-600 text-slate-200 hover:text-white font-bold text-xs px-3 py-2 rounded-lg transition-colors">
@@ -24,7 +24,7 @@
                 </a>
             </div>
         @empty
-            <p class="text-slate-500 col-span-3 text-center py-8">No hay usuarios registrados.</p>
+            <p class="text-slate-400 col-span-3 text-center py-8">No hay usuarios registrados.</p>
         @endforelse
     </div>
 </div>

@@ -1,5 +1,5 @@
 <div class="mb-8 border-b border-slate-700 pb-4">
-    <label class="block text-xs font-semibold uppercase text-slate-400 mb-3">¿Qué deseas crear o subir?</label>
+    <label class="block text-xs font-semibold uppercase text-slate-300 mb-3">¿Qué deseas crear o subir?</label>
     <div class="flex flex-wrap gap-2 text-xs font-bold">
         <a href="{{ route('resources.create') }}" 
            class="px-4 py-2.5 rounded-lg border transition-all flex items-center gap-1.5 {{ request()->routeIs('resources.create') ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-indigo-500' }}">

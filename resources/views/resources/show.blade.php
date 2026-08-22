@@ -14,7 +14,7 @@
                 </span>
                 <h1 class="text-3xl font-bold text-slate-100">{{ $resource->title }}</h1>
                 @if($resource->description)
-                    <p class="text-slate-400 mt-2">{{ $resource->description }}</p>
+                    <p class="text-slate-300 mt-2">{{ $resource->description }}</p>
                 @endif
             </div>
 
@@ -28,51 +28,51 @@
         <!-- Metadatos Identificativos -->
         <div class="mt-6 pt-4 border-t border-slate-700/60 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
             <div>
-                <span class="block text-slate-500 text-xs">Juego:</span>
+                <span class="block text-slate-400 text-xs">Juego:</span>
                 @if($resource->game)
                     <a href="{{ route('resources.index', ['game' => $resource->game]) }}" class="font-semibold text-indigo-400 hover:underline">
                         🎲 {{ $resource->game }}
                     </a>
                 @else
-                    <span class="font-semibold text-slate-400">General</span>
+                    <span class="font-semibold text-slate-300">General</span>
                 @endif
             </div>
 
             <div>
-                <span class="block text-slate-500 text-xs">Campaña:</span>
+                <span class="block text-slate-400 text-xs">Campaña:</span>
                 @if($resource->campaign)
                     <a href="{{ route('resources.index', ['campaign' => $resource->campaign]) }}" class="font-semibold text-indigo-400 hover:underline">
                         📜 {{ $resource->campaign }}
                     </a>
                 @else
-                    <span class="font-semibold text-slate-400">No especificada</span>
+                    <span class="font-semibold text-slate-300">No especificada</span>
                 @endif
             </div>
 
             <div>
-                <span class="block text-slate-500 text-xs">Autor Original:</span>
+                <span class="block text-slate-400 text-xs">Autor Original:</span>
                 @if($resource->author)
                     <a href="{{ route('resources.index', ['author' => $resource->author]) }}" class="font-semibold text-indigo-400 hover:underline">
                         ✍️ {{ $resource->author }}
                     </a>
                 @else
-                    <span class="font-semibold text-slate-400">Desconocido</span>
+                    <span class="font-semibold text-slate-300">Desconocido</span>
                 @endif
             </div>
 
             <div>
-                <span class="block text-slate-500 text-xs">Subido por:</span>
+                <span class="block text-slate-400 text-xs">Subido por:</span>
                 @if($resource->user)
                     <a href="{{ route('resources.index', ['user_id' => $resource->user_id]) }}" class="font-semibold text-indigo-400 hover:underline">
                         👤 {{ $resource->user->name }}
                     </a>
                 @else
-                    <span class="font-semibold text-slate-400">🌐 Anónimo</span>
+                    <span class="font-semibold text-slate-300">🌐 Anónimo</span>
                 @endif
             </div>
 
             <div>
-                <span class="block text-slate-500 text-xs">Privacidad:</span>
+                <span class="block text-slate-400 text-xs">Privacidad:</span>
                 <span class="font-semibold {{ $resource->privacy === 'private' ? 'text-amber-400' : 'text-emerald-400' }}">
                     {{ ucfirst($resource->privacy) }}
                 </span>
@@ -183,7 +183,7 @@
                                 <button id="pdf-prev" type="button" class="bg-slate-800 hover:bg-indigo-600 text-slate-200 px-3 py-1.5 rounded border border-slate-700 transition-colors">
                                     ◀ Anterior
                                 </button>
-                                <span class="text-slate-400">
+                                <span class="text-slate-300">
                                     Página <strong id="pdf-page-num" class="text-slate-200">1</strong> de <strong id="pdf-page-count" class="text-slate-200">--</strong>
                                 </span>
                                 <button id="pdf-next" type="button" class="bg-slate-800 hover:bg-indigo-600 text-slate-200 px-3 py-1.5 rounded border border-slate-700 transition-colors">
@@ -195,7 +195,7 @@
                                 <button id="pdf-zoom-out" type="button" class="bg-slate-800 hover:bg-indigo-600 text-slate-200 px-3 py-1.5 rounded border border-slate-700 transition-colors">
                                     🔍- Reducir
                                 </button>
-                                <span id="pdf-zoom-level" class="text-slate-400 font-semibold">100%</span>
+                                <span id="pdf-zoom-level" class="text-slate-300 font-semibold">100%</span>
                                 <button id="pdf-zoom-in" type="button" class="bg-slate-800 hover:bg-indigo-600 text-slate-200 px-3 py-1.5 rounded border border-slate-700 transition-colors">
                                     🔍+ Aumentar
                                 </button>
@@ -421,7 +421,7 @@
                             📦 Estructura del Archivo ({{ $formatLabel }})
                         </span>
                         @if(count($treeList) > 0)
-                            <span class="text-slate-400">{{ count($treeList) }} elementos encontrados</span>
+                            <span class="text-slate-300">{{ count($treeList) }} elementos encontrados</span>
                         @endif
                     </div>
 
@@ -447,10 +447,10 @@
                                     <span class="truncate pr-4 flex items-center gap-2">
                                         <span class="text-base leading-none">{{ $item['is_dir'] ? '📁' : '📄' }}</span>
                                         <span class="font-semibold">{{ $item['name'] }}</span>
-                                        <span class="text-slate-500 font-normal text-xs hidden md:inline">({{ $cleanPath }})</span>
+                                        <span class="text-slate-400 font-normal text-xs hidden md:inline">({{ $cleanPath }})</span>
                                     </span>
 
-                                    <span class="text-slate-500 text-xs shrink-0 font-mono">
+                                    <span class="text-slate-400 text-xs shrink-0 font-mono">
                                         @if($item['is_dir'])
                                             <span class="bg-indigo-950 text-indigo-400 text-[10px] px-1.5 py-0.5 rounded border border-indigo-800/40">Carpeta</span>
                                         @else
@@ -462,7 +462,7 @@
                         </div>
                     @else
                         <div class="p-6 bg-slate-900 rounded-lg border border-slate-700 text-center space-y-3">
-                            <p class="text-slate-400 text-sm">Contenido empaquetado en formato {{ $formatLabel }}.</p>
+                            <p class="text-slate-300 text-sm">Contenido empaquetado en formato {{ $formatLabel }}.</p>
                             @if($fileUrl)
                                 <a href="{{ $fileUrl }}" download target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow">
                                     ⬇️ Descargar {{ $formatLabel }} Completo
@@ -520,7 +520,7 @@
                     });
                 </script>
             @else
-                <p class="text-slate-400">No se pudo cargar la imagen del mapa.</p>
+                <p class="text-slate-300">No se pudo cargar la imagen del mapa.</p>
             @endif
 
         <!-- VISOR 3: FICHAS, DIARIOS Y CAMPAÑAS -->
@@ -547,7 +547,7 @@
                         @endif
                     @endforeach
                 @else
-                    <p class="text-slate-400 italic">Este recurso no contiene bloques de contenido.</p>
+                    <p class="text-slate-300 italic">Este recurso no contiene bloques de contenido.</p>
                 @endif
             </div>
         @endif

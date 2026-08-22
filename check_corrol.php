@@ -15,7 +15,7 @@ header('Content-Type: text/html; charset=utf-8');
 <body class="bg-slate-900 text-slate-100 min-h-screen p-8">
     <div class="max-w-3xl mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl">
         <h1 class="text-3xl font-bold text-indigo-400 mb-2">🎲 Diagnóstico CorRol</h1>
-        <p class="text-slate-400 text-sm mb-6">Comprobando compatibilidad de requisitos en Strato...</p>
+        <p class="text-slate-300 text-sm mb-6">Comprobando compatibilidad de requisitos en Strato...</p>
 
         <div class="space-y-4">
             
@@ -23,7 +23,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
                 <div>
                     <strong class="block text-sm">Versión de PHP</strong>
-                    <span class="text-xs text-slate-400">Laravel 11+ requiere PHP >= 8.2</span>
+                    <span class="text-xs text-slate-300">Laravel 11+ requiere PHP >= 8.2</span>
                 </div>
                 <div>
                     <?php if (version_compare(PHP_VERSION, '8.2.0', '>=')): ?>
@@ -71,7 +71,7 @@ header('Content-Type: text/html; charset=utf-8');
             <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
                 <div>
                     <strong class="block text-sm">Función Symlink (Enlace Simbólico)</strong>
-                    <span class="text-xs text-slate-400">Permite enlazar la carpeta pública sin exponer el código</span>
+                    <span class="text-xs text-slate-300">Permite enlazar la carpeta pública sin exponer el código</span>
                 </div>
                 <div>
                     <?php 
@@ -91,7 +91,7 @@ header('Content-Type: text/html; charset=utf-8');
 
         </div>
 
-        <div class="mt-8 pt-4 border-t border-slate-700 text-center text-xs text-slate-500">
+        <div class="mt-8 pt-4 border-t border-slate-700 text-center text-xs text-slate-400">
             Elimina este archivo (<code>check_corrol.php</code>) de tu servidor una vez finalices la prueba.
         </div>
     </div>

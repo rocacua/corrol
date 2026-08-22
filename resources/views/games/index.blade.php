@@ -5,7 +5,7 @@
 @section('content')
 <div class="space-y-6">
     <h1 class="text-3xl font-bold text-indigo-400">⚔️ Listado de Juegos de Rol</h1>
-    <p class="text-slate-400 text-sm">Explora todos los juegos para los que los usuarios han publicado recursos.</p>
+    <p class="text-slate-300 text-sm">Explora todos los juegos para los que los usuarios han publicado recursos.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         @forelse($games as $game)
@@ -14,7 +14,7 @@
                 🎲 {{ $game }}
             </a>
         @empty
-            <p class="text-slate-500 col-span-4 text-center py-8">Aún no hay juegos registrados.</p>
+            <p class="text-slate-400 col-span-4 text-center py-8">Aún no hay juegos registrados.</p>
         @endforelse
     </div>
 </div>

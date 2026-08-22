@@ -48,7 +48,7 @@
         </button>
     </form>
 
-    <p class="text-center text-xs text-slate-400 mt-6">
+    <p class="text-center text-xs text-slate-300 mt-6">
         ¿Ya tienes cuenta? <a href="{{ route('login') }}" class="text-indigo-400 hover:underline">Inicia sesión</a>
     </p>
 </div>

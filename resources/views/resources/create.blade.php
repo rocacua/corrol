@@ -9,7 +9,7 @@
     @include('partials.creation-nav')
     
     <h1 class="text-3xl font-bold mb-2 text-indigo-400">🎲 Subir / Registrar Recurso</h1>
-    <p class="text-slate-400 mb-6">Añade manuales, imágenes, audios, mapas o enlaces para tus campañas de rol.</p>
+    <p class="text-slate-300 mb-6">Añade manuales, imágenes, audios, mapas o enlaces para tus campañas de rol.</p>
 
     <!-- Indicador de Almacenamiento -->
     @php
@@ -26,7 +26,7 @@
 
     <div class="mb-6 p-4 rounded-lg bg-slate-900 border border-slate-700">
         <div class="flex justify-between items-center text-xs mb-1">
-            <span class="text-slate-400">Espacio en la Nube (Compartido):</span>
+            <span class="text-slate-300">Espacio en la Nube (Compartido):</span>
             <span class="font-semibold {{ $isLowStorage ? 'text-rose-400' : 'text-slate-300' }}">
                 {{ $formattedUsed }} de 10,240 MB usados (Quedan {{ $remainingMB }} MB)
             </span>
@@ -141,7 +141,7 @@
                     </select>
                 @else
                     <input type="hidden" name="privacy" value="public">
-                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-400 text-sm flex justify-between items-center">
+                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-300 text-sm flex justify-between items-center">
                         <span>🌐 Público (Sin registro)</span>
                         <a href="{{ route('login') }}" class="text-xs text-indigo-400 hover:underline">Inicia sesión para privado</a>
                     </div>
@@ -155,8 +155,8 @@
                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none">
             
             @if(!empty($allTags))
-                <div class="mt-2 flex flex-wrap gap-2 items-center text-xs text-slate-400">
-                    <span class="font-semibold text-slate-500">Sugerencias:</span>
+                <div class="mt-2 flex flex-wrap gap-2 items-center text-xs text-slate-300">
+                    <span class="font-semibold text-slate-400">Sugerencias:</span>
                     @foreach ($allTags as $tag)
                         <button type="button" data-tag="{{ $tag }}" 
                                 class="tag-suggestion-btn bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white px-2 py-1 rounded-md transition-colors cursor-pointer">
@@ -175,10 +175,10 @@
             <div>
                 <label for="file-input" class="block text-sm font-medium mb-2">Opción 1: Subir Archivo (PDF, Imagen, ZIP, Audio, Video)</label>
                 <input type="file" id="file-input" name="file" 
-                       class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
             </div>
 
-            <div class="text-center text-xs text-slate-500 font-bold">- O BIEN -</div>
+            <div class="text-center text-xs text-slate-400 font-bold">- O BIEN -</div>
 
             <div>
                 <label for="url-input" class="block text-sm font-medium mb-2">Opción 2: Introducir Enlace / URL Externa</label>
