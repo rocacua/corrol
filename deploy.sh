@@ -294,6 +294,39 @@ RUTA_DESTINO="${RUTA_DESTINO:-$RUTA_DEFECTO}"
 # Convertir a ruta absoluta
 RUTA_DESTINO=$(expandir_ruta "$RUTA_DESTINO")
 
+read -p "$(pintar "URL deseada para CorRol [http://corrol.test/]: " "prompt" 0)" URL_CORROL
+URL_CORROL="${URL_CORROL:-http://corrol.test/}"
+
+# Extraer el host y el subpath (ej. corrol.test y /corrol)
+DOMINIO_LIMPIO=$(echo "$URL_CORROL" | sed -e 's|^[^/]*//||' -e 's|/.*||')
+SUB_PATH=$(echo "$URL_CORROL" | sed -e "s|http[s]*://${DOMINIO_LIMPIO}||")
+
+if [ "${SUB_PATH:-/}" = "/" ] && grep -RqsE "^[[:space:]]*(ServerName|ServerAlias)[[:space:]]+$DOMINIO_LIMPIO([[:space:]]|$)" /etc/apache2/sites-enabled /etc/apache2/conf-enabled 2>/dev/null; then
+    pintar "El host '$DOMINIO_LIMPIO' ya tiene una configuración Apache activa." "alerta"
+    if ! confirm "¿Deseas reemplazar su configuración para desplegar CorRol en la URL raíz?"; then
+        pintar "Despliegue cancelado para no modificar el host existente." "error"
+        exit 1
+    fi
+fi
+
+CREAR_ENLACE="n"
+if [ "${SUB_PATH:-/}" != "/" ]; then
+    CREAR_ENLACE="s"
+    PUBLIC_WEB_DIR_DEFAULT="$HOME/Documentos/corrol/public"
+    read -p "$(pintar "Ruta pública anfitriona [$PUBLIC_WEB_DIR_DEFAULT]: " "prompt" 0)" PUBLIC_WEB_DIR
+    PUBLIC_WEB_DIR="${PUBLIC_WEB_DIR:-$PUBLIC_WEB_DIR_DEFAULT}"
+    PUBLIC_WEB_DIR=$(expandir_ruta "$PUBLIC_WEB_DIR")
+    if [ ! -d "$PUBLIC_WEB_DIR" ]; then
+        pintar "La ruta pública anfitriona no existe: $PUBLIC_WEB_DIR" "error"
+        pintar "Para una subruta debe existir el public del host que ya funciona." "error"
+        exit 1
+    fi
+elif confirm "¿Deseas crear un enlace simbólico en un directorio público web (ej: /public/corrol)?"; then
+    CREAR_ENLACE="s"
+    read -p "$(pintar "Ruta destino del directorio público: " "prompt" 0)" PUBLIC_WEB_DIR
+    PUBLIC_WEB_DIR=$(expandir_ruta "$PUBLIC_WEB_DIR")
+fi
+
 # Intentar crear el directorio si no existe
 if [ ! -d "$RUTA_DESTINO" ]; then
     pintar "➜ Creando directorio de destino: $RUTA_DESTINO..." "menu"
@@ -354,13 +387,6 @@ cd "$RUTA_DESTINO" || {
 }
 pintar "Directorio de trabajo activo: $(pwd)" "exito"
 
-read -p "$(pintar "URL deseada para CorRol [http://corrol.test/]: " "prompt" 0)" URL_CORROL
-URL_CORROL="${URL_CORROL:-http://corrol.test/}"
-
-# Extraer el host y el subpath (ej. rocanyaweb.local y /corrol)
-DOMINIO_LIMPIO=$(echo "$URL_CORROL" | sed -e 's|^[^/]*//||' -e 's|/.*||')
-SUB_PATH=$(echo "$URL_CORROL" | sed -e "s|http[s]*://${DOMINIO_LIMPIO}||")
-
 # Registrar en /etc/hosts si no existe
 if ! grep -q "$DOMINIO_LIMPIO" /etc/hosts 2>/dev/null; then
     pintar "➜ Mapeando $DOMINIO_LIMPIO en /etc/hosts..." "menu"
@@ -372,7 +398,13 @@ fi
 configurar_apache() {
     local ruta_conf
     local apachectl_bin=""
+    local document_root="${1:-$(pwd)/public}"
     local subpath="${SUB_PATH:-/}"
+    local alias_target="${2:-}"
+    local apache_alias=""
+    local apache_rewrite=""
+    local apache_alias_directory=""
+    local apache_directory_index="    DirectoryIndex index.php"
     local nombre_sitio="corrol-${DOMINIO_LIMPIO//[^a-zA-Z0-9_.-]/_}.conf"
 
     if [ -x /usr/sbin/apache2ctl ]; then
@@ -390,11 +422,6 @@ configurar_apache() {
         return 0
     fi
 
-    if [ "$subpath" != "/" ]; then
-        pintar "URL con subruta detectada ($subpath); se usará el enlace simbólico del directorio público." "menu"
-        return 0
-    fi
-
     if [ "$OS" = "Debian-based" ]; then
         ruta_conf="$APACHE_CONF_DIR/$nombre_sitio"
     elif [ "$OS" = "Fedora-based" ] || [ "$OS" = "Arch-based" ] || [ "$OS" = "SUSE-based" ]; then
@@ -406,35 +433,52 @@ configurar_apache() {
         return 0
     fi
 
-    pintar "➜ Configurando Apache: $DOMINIO_LIMPIO -> $(pwd)/public..." "menu"
+    if [ "$subpath" != "/" ] && [ "$OS" = "Debian-based" ] && [ -d /etc/apache2/conf-available ]; then
+        for antiguo_conf in /etc/apache2/conf-available/corrol-*-path.conf; do
+            if [ -f "$antiguo_conf" ] && grep -q "^# CorRol - generado por deploy.sh$" "$antiguo_conf" && grep -q "^Alias ${subpath%/}/ " "$antiguo_conf"; then
+                antiguo_nombre="$(basename "$antiguo_conf" .conf)"
+                if [ -x /usr/sbin/a2disconf ]; then
+                    $SUDO /usr/sbin/a2disconf "$antiguo_nombre" >/dev/null || true
+                fi
+                $SUDO rm -f "$antiguo_conf"
+            fi
+        done
+    fi
+
+    if [ "$subpath" != "/" ]; then
+        apache_alias="    Alias ${subpath%/}/ ${alias_target%/}/"
+        apache_directory_index="    DirectoryIndex index.html index.php"
+        apache_alias_directory="    <Directory \"$alias_target\">
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>"
+    else
+        apache_rewrite="    RewriteRule ^/(build|assets)(/|$) - [END]
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]"
+    fi
+
+    pintar "➜ Configurando Apache: $DOMINIO_LIMPIO -> $document_root..." "menu"
     $SUDO tee "$ruta_conf" > /dev/null <<EOF
 # CorRol - generado por deploy.sh
 <VirtualHost *:80>
     ServerName $DOMINIO_LIMPIO
-    DocumentRoot $(pwd)/public
+    DocumentRoot $document_root
 
-    DirectoryIndex index.php
+${apache_directory_index}
     RewriteEngine On
-    RewriteRule ^/(build|assets)(/|$) - [END]
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+$apache_alias
+$apache_rewrite
 
-    Alias /build/ $(pwd)/public/build/
-    Alias /assets/ $(pwd)/public/assets/
-
-    <Directory "$(pwd)/public">
+    <Directory "$document_root">
         Options FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    <Directory "$(pwd)/public/build">
-        Require all granted
-    </Directory>
-    <Directory "$(pwd)/public/assets">
-        Require all granted
-    </Directory>
+$apache_alias_directory
 
     ErrorLog \${APACHE_LOG_DIR}/corrol_error.log
     CustomLog \${APACHE_LOG_DIR}/corrol_access.log combined
@@ -469,8 +513,6 @@ EOF
     fi
     pintar "Configuración de Apache aplicada correctamente." "exito"
 }
-
-configurar_apache
 
 # ==============================================================================
 # PASO 4: CONFIGURACIÓN DEL ARCHIVO .ENV
@@ -636,8 +678,7 @@ pintar "➜ Generando enlace simbólico de almacenamiento public/storage..." "me
 php artisan storage:link --force || true
 
 # 8. Symlink opcional en el directorio público del servidor web
-if confirm "¿Deseas crear un enlace simbólico en un directorio público web (ej: /public/corrol)?"; then
-    read -p "$(pintar "Ruta destino del directorio público (ej: /home/ricardo/workspace/ocanyaweb/ricardo/public/): " "prompt" 0)" PUBLIC_WEB_DIR
+if [ "$CREAR_ENLACE" = "s" ]; then
     PUBLIC_WEB_DIR_INPUT="$PUBLIC_WEB_DIR"
     if [ -L "$PUBLIC_WEB_DIR_INPUT" ]; then
         pintar "La ruta pública es un enlace simbólico; indica el directorio público real." "error"
@@ -655,29 +696,43 @@ if confirm "¿Deseas crear un enlace simbólico en un directorio público web (e
         LINK_TARGET="$PUBLIC_WEB_DIR/$LINK_NAME"
         if [ "$LINK_TARGET" = "$PUBLIC_WEB_DIR" ]; then
             pintar "El nombre del enlace no es válido; se conserva el directorio público." "error"
+        elif [ -e "$LINK_TARGET" ] || [ -L "$LINK_TARGET" ]; then
+            pintar "Ya existe una publicación en '$LINK_TARGET'." "alerta"
+            if ! confirm "¿Deseas reemplazarla por el enlace hacia $(pwd)/public?"; then
+                pintar "Despliegue cancelado para no modificar la publicación existente." "error"
+                exit 1
+            fi
+            if ! rm -rf "$LINK_TARGET" 2>/dev/null && ! $SUDO rm -rf "$LINK_TARGET"; then
+                pintar "No se pudo retirar la publicación existente '$LINK_TARGET'." "error"
+                exit 1
+            fi
+            if ln -s "$(pwd)/public" "$LINK_TARGET" 2>/dev/null || $SUDO ln -s "$(pwd)/public" "$LINK_TARGET"; then
+                pintar "Enlace simbólico creado: $LINK_TARGET -> $(pwd)/public" "exito"
+            else
+                pintar "No se pudo crear el enlace simbólico en '$LINK_TARGET'." "error"
+                exit 1
+            fi
         elif ln -sfn "$(pwd)/public" "$LINK_TARGET" 2>/dev/null || $SUDO ln -sfn "$(pwd)/public" "$LINK_TARGET"; then
             pintar "Enlace simbólico creado: $LINK_TARGET -> $(pwd)/public" "exito"
-            if [ "$OS" = "Debian-based" ] && [ -d /etc/apache2/conf-available ]; then
-                CONF_NAME="corrol-${DOMINIO_LIMPIO//[^a-zA-Z0-9_.-]/_}-path.conf"
-                $SUDO tee "/etc/apache2/conf-available/$CONF_NAME" > /dev/null <<EOF
-<Directory "$PUBLIC_WEB_DIR">
-    Options FollowSymLinks
-    AllowOverride All
-    Require all granted
-</Directory>
-EOF
-                if [ -x /usr/sbin/a2enconf ]; then
-                    $SUDO /usr/sbin/a2enconf "$CONF_NAME" >/dev/null
-                    $SUDO /usr/sbin/apache2ctl configtest >/dev/null
-                    $SUDO systemctl reload apache2
-                fi
-            fi
         else
             pintar "No se pudo crear el enlace simbólico en '$LINK_TARGET'." "error"
+            if [ "${SUB_PATH:-/}" != "/" ]; then
+                exit 1
+            fi
         fi
     else
         pintar "La ruta proporcionada no existe. Omitiendo enlace." "alerta"
+        if [ "${SUB_PATH:-/}" != "/" ]; then
+            pintar "No se puede publicar la subruta sin un directorio público válido." "error"
+            exit 1
+        fi
     fi
+fi
+
+if [ "${SUB_PATH:-/}" != "/" ] && [ -n "${PUBLIC_WEB_DIR:-}" ] && [ -d "$PUBLIC_WEB_DIR" ]; then
+    configurar_apache "$PUBLIC_WEB_DIR" "$LINK_TARGET"
+else
+    configurar_apache
 fi
 
 # 9. Limpiar cachés
@@ -695,10 +750,22 @@ echo ""
 pintar "=== AUDITORÍA Y VERIFICACIÓN HTTP FINAL ===" "menu"
 
 CODIGO_HTTP=0
+CODIGO_RUTA=0
 CODIGO_ASSET=0
 if command -v curl &>/dev/null; then
-    CODIGO_HTTP=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 "$URL_CORROL" 2>/dev/null || true)
+    CODIGO_HTTP=$(curl -sL -o /dev/null -w "%{http_code}" --connect-timeout 5 "$URL_CORROL" 2>/dev/null || true)
     CODIGO_HTTP="${CODIGO_HTTP:-0}"
+
+    if [ "${SUB_PATH:-/}" != "/" ]; then
+        RUTA_PRUEBA_URL="${URL_CORROL%/}/resources"
+        CODIGO_RUTA=$(curl -sL -o /dev/null -w "%{http_code}" --connect-timeout 5 "$RUTA_PRUEBA_URL" 2>/dev/null || true)
+        CODIGO_RUTA="${CODIGO_RUTA:-0}"
+        if [ "$CODIGO_RUTA" -lt 200 ] || [ "$CODIGO_RUTA" -ge 400 ]; then
+            pintar "Ruta Laravel no accesible: $RUTA_PRUEBA_URL (HTTP $CODIGO_RUTA)." "alerta"
+        fi
+    else
+        CODIGO_RUTA="$CODIGO_HTTP"
+    fi
 
     ASSET_RELATIVE=$(php -r '$manifest = json_decode(file_get_contents("public/build/manifest.json"), true); echo $manifest["resources/css/app.css"]["file"] ?? "";' 2>/dev/null || true)
     if [ -n "$ASSET_RELATIVE" ]; then
@@ -715,9 +782,9 @@ SEGUNDOS_FIN=$(date +"%s")
 TIEMPO_TOTAL=$((SEGUNDOS_FIN - SEGUNDOS_INICIO))
 
 echo "------------------------------------------------------------------------------"
-if [ "$CODIGO_HTTP" -eq 200 ] || [ "$CODIGO_HTTP" -eq 301 ] || [ "$CODIGO_HTTP" -eq 302 ]; then
+if [ "$CODIGO_HTTP" -ge 200 ] && [ "$CODIGO_HTTP" -lt 400 ] && [ "$CODIGO_RUTA" -ge 200 ] && [ "$CODIGO_RUTA" -lt 400 ]; then
     if [ "$CODIGO_ASSET" -eq 200 ]; then
-        pintar "🎉 ¡DESPLIEGUE COMPLETADO Y AUDITADO EXITOSAMENTE (Web: $CODIGO_HTTP, asset: $CODIGO_ASSET)!" "exito"
+        pintar "🎉 ¡DESPLIEGUE COMPLETADO Y AUDITADO EXITOSAMENTE (Web: $CODIGO_HTTP, ruta: $CODIGO_RUTA, asset: $CODIGO_ASSET)!" "exito"
     else
         pintar "La web responde ($CODIGO_HTTP), pero un asset CSS/JS no responde correctamente (Código: $CODIGO_ASSET)." "alerta"
     fi
