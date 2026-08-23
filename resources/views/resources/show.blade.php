@@ -151,6 +151,19 @@
                         $googleEmbedUrl = preg_replace('/\/edit.*$/', '/preview', $fileUrl);
                     }
                 }
+                $path = parse_url($fileUrl ?? '', PHP_URL_PATH) ?? '';
+                $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+                $isOfficeDocument = in_array($extension, [
+                    'doc', 'docx', '.docm', 'dot', 'dotx', 'dotm', 'xls', 'xlsx', 'xlsb', 'xlsm', '.xlt', 'xltx', 'xltm', 'ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'ppsm', 'pot', 'potx', 'potm', 'odt', 'ods', 'odp', 'rtf'
+                ], true);
+
+                $isHtmlDocument = in_array($extension, [
+                    'html', 'htm',
+                ], true);
+                $isTxtDocument = in_array($extension, [
+                    'txt', 'md', 'markdown', 'csv', 'log', 'json', 'xml', 'yml', 'yaml'
+                ], true);
             @endphp
 
             @if($type === 'image')
@@ -347,10 +360,26 @@
                         </div>
                         <iframe src="{{ $googleEmbedUrl }}" class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"></iframe>
                     </div>
-                @else
+                @elseif($isOfficeDocument)
                     <div class="w-full space-y-4">
                         <iframe src="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($fileUrl) }}" class="w-full h-[650px] rounded-lg border border-slate-700"></iframe>
                     </div>
+                @elseif($isTxtDocument)
+                    {{-- Visor de Archivos de Texto (TXT, MD, CSV, JSON, XML, YAML) --}}
+                    <div class="w-full space-y-4">
+                        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                            <span class="text-slate-300 font-semibold flex items-center gap-2">
+                                📄 Documento de Texto
+                            </span>
+                        </div>
+                        <iframe src="{{ $fileUrl }}" class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"></iframe>
+                    </div>
+                @else
+                    <iframe
+                        src="{{ $fileUrl }}"
+                        class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"
+                        sandbox="allow-same-origin"
+                    ></iframe>
                 @endif
             
             @elseif($type === 'audio')
@@ -441,8 +470,8 @@
                                         default => 'pl-0',
                                     };
                                 @endphp
-                                <div class="flex justify-between items-center py-1 border-b border-slate-800/50 hover:bg-slate-800/50 rounded px-2 transition-colors {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }}" 
-                                     class="{{ $paddingClass }}">
+                                <div class="flex justify-between items-center py-1 border-b border-slate-800/50 hover:bg-slate-800/50 rounded px-2 transition-colors {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }}
+                                     {{ $paddingClass }}">
                                     
                                     <span class="truncate pr-4 flex items-center gap-2">
                                         <span class="text-base leading-none">{{ $item['is_dir'] ? '📁' : '📄' }}</span>

@@ -57,7 +57,7 @@
                         </span>
                         <span class="text-xs text-slate-300">
                             <strong class="text-slate-200">
-                                {{ $resource->game ?? 'General' }}/{{ $resource->category ?? '' }}/{{ $resource->author ?? 'Anónimo' }}
+                                {{ $resource->game ?? 'General' }}<br />{{ $resource->campaign ?? '' }}<br />{{ $resource->author ?? 'Anónimo' }}
                             </strong>
                         </span>
                     </div>
