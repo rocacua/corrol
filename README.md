@@ -117,7 +117,27 @@ El proyecto ha sido concebido bajo estrictos principios de ingeniería de softwa
 
 ## 💻 Instalación y Puesta en Marcha Local
 
-### 1. Clonar el repositorio
+### Opción A: Despliegue Automatizado e Interactivo (Recomendado en Linux)
+
+El proyecto incluye un script Bash (`deploy.sh`) que realiza la instalación, verificación de dependencias, configuración de base de datos, compilación de assets con Vite y la reparación automática de permisos/AppArmor en servidores Apache/Linux:
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+El script se encargará de:
+1. Detectar e instalar dependencias faltantes (`composer`, `npm`, `mysql`).
+2. Configurar el archivo `.env` e importar archivos `.sql` si es necesario.
+3. Generar la clave de aplicación y compilar el frontend con Vite (`npm run build`).
+4. Resolver problemas de permisos en `/home/` y AppArmor redirigiendo las vistas compiladas a `/tmp/corrol_views`.
+5. Crear symlinks web y limpiar cachés de Laravel.
+
+---
+
+### Opción B: Instalación Manual paso a paso
+
+#### 1. Clonar el repositorio
 ```bash
 git clone https://github.com/rocacua/corrol.git
 cd corrol
@@ -169,6 +189,27 @@ php artisan migrate
 php artisan serve
 ```
 La aplicación estará disponible en `http://localhost:8000`.
+
+---
+
+## 🔧 Resolución de Problemas Frecuentes en Linux / Apache
+
+Si despliegas CorRol bajo Apache en un entorno local de desarrollo (por ejemplo `http://rocanyaweb.local/corrol`), es posible encontrar los siguientes errores comunes:
+
+### 1. `tempnam(): file created in the system's temporary directory` (Error HTTP 500)
+* **Causa:** Apache (`www-data`) no tiene permisos para escribir en `/home/usuario/.../storage/framework/views` debido a restricciones del módulo de seguridad **AppArmor** o permisos de travesía en carpetas personales.
+* **Solución:**
+  1. Define en tu archivo `.env`: `VIEW_COMPILED_PATH=/tmp/corrol_views`
+  2. Crea la carpeta y dale permisos: `mkdir -p /tmp/corrol_views && chmod 777 /tmp/corrol_views`
+  3. Limpia las vistas: `php artisan view:clear && php artisan config:clear`
+
+### 2. `ViteManifestNotFoundException` (Falta `manifest.json`)
+* **Causa:** Los assets de Vite no han sido compilados.
+* **Solución:** Ejecuta `npm install && npm run build`.
+
+### 3. Error de Escritura en `laravel.log` (`Monolog StreamHandler`)
+* **Causa:** Propietario de la carpeta `storage/logs` incorrecto.
+* **Solución:** `sudo chown -R $USER:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache`.
 
 ---
 
