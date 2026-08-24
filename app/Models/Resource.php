@@ -41,4 +41,15 @@ class Resource extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+     public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorite_resources')->withTimestamps();
+    }
+
+    public function isFavoritedBy(?User $user): bool
+    {
+        if (!$user) return false;
+        return $this->favoritedBy()->where('user_id', $user->id)->exists();
+    }
 }

@@ -5,16 +5,29 @@
 @section('content')
 <div class="max-w-md mx-auto space-y-6">
 
-    <!-- Tarjeta de Acceso a Mis Recursos -->
-    <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex items-center justify-between">
-        <div>
-            <h3 class="text-lg font-bold text-slate-100">📂 Mis Recursos</h3>
-            <p class="text-xs text-slate-300">Total de recursos creados: {{ $user->resources()->count() }}</p>
+    <!-- Tarjeta de Acceso a Mis Recursos y Favoritos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between space-y-3">
+            <div>
+                <h3 class="text-lg font-bold text-slate-100">📂 Mis Recursos</h3>
+                <p class="text-xs text-slate-300 mt-1">Total creados: {{ $user->resources()->count() }}</p>
+            </div>
+            <a href="{{ route('resources.index', ['user_id' => $user->id]) }}" 
+               class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-md transition-colors text-center">
+                Ver Mis Recursos →
+            </a>
         </div>
-        <a href="{{ route('resources.index', ['user_id' => $user->id]) }}" 
-           class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-md transition-colors">
-            Ver Mis Recursos →
-        </a>
+
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex flex-col justify-between space-y-3">
+            <div>
+                <h3 class="text-lg font-bold text-slate-100">⭐ Mis Favoritos</h3>
+                <p class="text-xs text-slate-300 mt-1">Recursos guardados: {{ $user->favorites()->count() }}</p>
+            </div>
+            <a href="{{ route('favorites.index', $user->id) }}" 
+               class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-md transition-colors text-center">
+                Ver Mis Favoritos →
+            </a>
+        </div>
     </div>
 
     <!-- Formulario de Edición de Perfil -->

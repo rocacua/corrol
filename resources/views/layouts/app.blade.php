@@ -143,6 +143,9 @@
                 <span class="text-slate-300">Licencia MIT</span>
             </div>
         </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            <p class="text-center text-slate-500">CorRol utiliza únicamente cookies técnicas estrictamente necesarias para la autenticación de usuarios y la seguridad del sitio. No utilizamos cookies de análisis, rastreo ni publicidad de terceros.</p>
+        </div>
     </footer>
     
     <script>

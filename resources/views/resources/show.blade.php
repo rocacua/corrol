@@ -89,10 +89,20 @@
             </div>
         @endif
 
-        <!-- Botones de Acción (Editar, Eliminar y Clonar) -->
+        <!-- Botones de Acción (Editar, Eliminar, Favorito y Clonar) -->
         @auth
             <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t border-slate-700/60 items-center">
                 
+
+                <div class="flex gap-3 mt-6 pt-4 border-t border-slate-700/60">
+                    {{-- Botón Marcar / Quitar de Favoritos --}}
+                    <form action="{{ route('resources.favorite.toggle', $resource->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="font-bold px-4 py-2 rounded-lg text-sm shadow transition-colors flex items-center gap-1.5 {{ $isFavorited ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200' }}">
+                            {{ $isFavorited ? '⭐ Quitar de Favoritos' : '☆ Añadir a Favoritos' }}
+                        </button>
+                    </form>
+
                 {{-- Botón Clonar / Usar como Plantilla (para Fichas, Diarios, Campañas y Mapas) --}}
                 @if(in_array($resource->type, ['sheet', 'diary', 'campaign', 'map']))
                     @php
@@ -104,7 +114,7 @@
                         📋 Clonar / Usar como Plantilla
                     </a>
                 @endif
-
+                </div>
                 {{-- Botones Editar y Eliminar (Solo Propietario o Recursos Anónimos) --}}
                 @if($resource->user_id === null || $resource->user_id === auth()->id())
                     @php

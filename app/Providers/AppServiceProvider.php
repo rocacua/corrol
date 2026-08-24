@@ -13,6 +13,8 @@ use App\Strategies\FileProcessors\TarGzProcessor;
 use App\Strategies\FileProcessors\RarProcessor;
 use App\Strategies\FileProcessors\SevenZipProcessor;
 use App\Strategies\FileProcessors\DefaultProcessor;
+use App\Repositories\Contracts\AdminRepositoryInterface;
+use App\Repositories\Eloquent\AdminRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
                 $app->tagged('file_processors')
             );
         });
+
+        $this->app->bind(
+            AdminRepositoryInterface::class,
+            AdminRepository::class
+        );
     }
 
     /**

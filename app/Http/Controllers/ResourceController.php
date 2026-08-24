@@ -12,18 +12,22 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Services\FavoriteService;
 
 class ResourceController extends Controller
 {
     protected ResourceUploadService $uploadService;
     protected ResourceRepositoryInterface $resourceRepository;
+    protected FavoriteService $favoriteService;
 
     public function __construct(
         ResourceUploadService $uploadService,
-        ResourceRepositoryInterface $resourceRepository
+        ResourceRepositoryInterface $resourceRepository,
+        FavoriteService $favoriteService
     ) {
         $this->uploadService = $uploadService;
         $this->resourceRepository = $resourceRepository;
+        $this->favoriteService = $favoriteService;
     }
 
     public function create(): View
@@ -69,6 +73,7 @@ class ResourceController extends Controller
             abort(403, 'No tienes permiso para ver este recurso privado.');
         }
 
+        $isFavorited = Auth::check() ? $this->favoriteService->isFavorited(Auth::id(), $resource->id) : false;
         $fileUrl = null;
         $fileTree = [];
         $fileContent = null; 
@@ -92,7 +97,7 @@ class ResourceController extends Controller
             }
         }
 
-        return view('resources.show', compact('resource', 'fileUrl', 'fileTree', 'fileContent'));
+        return view('resources.show', compact('resource', 'fileUrl', 'fileTree', 'fileContent', 'isFavorited'));
     }
 
     public function edit(int $id): View

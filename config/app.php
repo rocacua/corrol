@@ -123,4 +123,11 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Clave Secreta de Activación Admin
+    |--------------------------------------------------------------------------
+    */
+    'setup_secret_key' => env('SETUP_SECRET_KEY'),
+
 ];

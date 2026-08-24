@@ -19,4 +19,7 @@ interface ResourceRepositoryInterface
     public function createMapResource(array $data, string $mapImageUrl, array $markers): mixed;
     public function updateMapResource(Resource $resource, array $data, string $mapImageUrl, array $markers): mixed;
     public function getUserResourcesByType(int $userId, string $type): mixed;
+    public function toggleFavorite(int $userId, int $resourceId): bool;
+    public function isFavorited(int $userId, int $resourceId): bool;
+    public function getFavoriteResources(int $targetUserId, ?int $viewerUserId = null, array $filters = []): mixed;
 }

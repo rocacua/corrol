@@ -265,4 +265,49 @@ class ResourceRepository implements ResourceRepositoryInterface
             ->latest()
             ->get();
     }
+
+    public function toggleFavorite(int $userId, int $resourceId): bool
+    {
+        /** @var User|null $user */
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        $changes = $user->favorites()->toggle($resourceId);
+        return count($changes['attached']) > 0;
+    }
+
+    public function isFavorited(int $userId, int $resourceId): bool
+    {
+        /** @var User|null $user */
+        $user = User::find($userId);
+        return $user ? $user->favorites()->where('resource_id', $resourceId)->exists() : false;
+    }
+
+    public function getFavoriteResources(int $targetUserId, ?int $viewerUserId = null, array $filters = []): mixed
+    {
+        $sort = $filters['sort'] ?? 'latest';
+
+        $query = Resource::query()
+            ->whereHas('favoritedBy', function (Builder $q) use ($targetUserId) {
+                $q->where('user_id', $targetUserId);
+            })
+            ->with(['resourceable', 'user'])
+            ->where(function (Builder $query) use ($viewerUserId) {
+                $query->where('privacy', 'public');
+                if ($viewerUserId) {
+                    $query->orWhere('user_id', $viewerUserId);
+                }
+            });
+
+        match ($sort) {
+            'oldest' => $query->oldest(),
+            'title_asc' => $query->orderBy('title', 'asc'),
+            'title_desc' => $query->orderBy('title', 'desc'),
+            default => $query->latest(),
+        };
+
+        return $query->paginate(12)->withQueryString();
+    }
 }

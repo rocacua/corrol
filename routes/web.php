@@ -79,6 +79,9 @@ Route::get('/legal', function () {
     return view('legal');
 })->name('legal');
 
+Route::get('/favorites/{userId?}', [\App\Http\Controllers\FavoriteController::class, 'index'])->name('favorites.index');
+Route::post('/resources/{resource}/favorite', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->middleware('auth')->name('resources.favorite.toggle');
+
 /*
 |--------------------------------------------------------------------------
 | Ruta de Mantenimiento y Setup para Hosting Compartido (Strato sin SSH)
@@ -112,4 +115,18 @@ Route::get('/strato-setup', function (\Illuminate\Http\Request $request) {
     $output[] = "🚀 Cachés de producción generadas en Strato.";
 
     return response('<pre>' . implode("\n", $output) . '</pre>');
+});
+
+// 🔑 Ruta de Activación Secreta de Admin usando SETUP_SECRET_KEY (Solo accesible si estás logueado)
+Route::get('/secret-claim-admin/{secretKey}', [\App\Http\Controllers\Admin\AdminController::class, 'claimAdmin'])
+    ->middleware('auth')
+    ->name('admin.claim');
+
+// 🔒 Grupo de Rutas de Administración (Devuelve 404 a cualquier usuario normal)
+Route::middleware(['auth', 'admin'])->prefix('secret-admin-panel')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/resources/{id}/edit', [\App\Http\Controllers\Admin\AdminController::class, 'editResource'])->name('admin.resources.edit');
+    Route::put('/resources/{id}', [\App\Http\Controllers\Admin\AdminController::class, 'updateResource'])->name('admin.resources.update');
+    Route::get('/mailing', [\App\Http\Controllers\Admin\AdminController::class, 'mailingForm'])->name('admin.mailing');
+    Route::post('/mailing/send', [\App\Http\Controllers\Admin\AdminController::class, 'sendMailing'])->name('admin.mailing.send');
 });
