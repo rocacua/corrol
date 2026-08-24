@@ -78,3 +78,38 @@ Route::get('/resources/{id}/stream', [ResourceController::class, 'streamPdf'])->
 Route::get('/legal', function () {
     return view('legal');
 })->name('legal');
+
+/*
+|--------------------------------------------------------------------------
+| Ruta de Mantenimiento y Setup para Hosting Compartido (Strato sin SSH)
+|--------------------------------------------------------------------------
+*/
+Route::get('/strato-setup', function (\Illuminate\Http\Request $request) {
+    $secretKey = env('SETUP_SECRET_KEY', 'MiClaveDeSeguridad123!');
+
+    if ($request->get('key') !== $secretKey) {
+        abort(403, 'Acceso denegado: Clave de seguridad incorrecta.');
+    }
+
+    $output = [];
+
+    // 1. Ejecutar migraciones de base de datos
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    $output[] = "✅ Migraciones ejecuadas: " . \Illuminate\Support\Facades\Artisan::output();
+
+    // 2. Crear enlace simbólico público de storage
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        $output[] = "✅ Enlace simbólico de Storage generado.";
+    } catch (\Exception $e) {
+        $output[] = "⚠️ Symlink: " . $e->getMessage();
+    }
+
+    // 3. Generar cachés de producción con las rutas reales del servidor de Strato
+    \Illuminate\Support\Facades\Artisan::call('config:cache');
+    \Illuminate\Support\Facades\Artisan::call('route:cache');
+    \Illuminate\Support\Facades\Artisan::call('view:cache');
+    $output[] = "🚀 Cachés de producción generadas en Strato.";
+
+    return response('<pre>' . implode("\n", $output) . '</pre>');
+});

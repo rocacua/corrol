@@ -43,7 +43,19 @@ class ResourceUploadService
         
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('b2');
-        $mimeType = $file->getMimeType() ?: $file->getClientMimeType();
+        //$mimeType = $file->getMimeType() ?: $file->getClientMimeType();
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        $mimeType = match ($extension) {
+            'ogv' => 'video/ogg',
+            'ogg' => 'audio/ogg',
+            'webm' => 'video/webm',
+            'mp4' => 'video/mp4',
+            default => $file->getMimeType()
+                ?: $file->getClientMimeType()
+                ?: 'application/octet-stream',
+        };
+        $metadata['mime_type'] = $mimeType;
 
         $path = $disk->putFileAs(
             'resources',
@@ -227,23 +239,29 @@ class ResourceUploadService
 
         /** @var FilesystemAdapter $disk */
         $disk = Storage::disk('b2');
+        $filePath = $resourceFile->file_path_or_url;
 
-        $mimeType = $resourceFile->mime_type ?: match ($resourceFile->file_type) {
-            'audio' => 'audio/ogg',
-            'video' => 'video/mp4',
-            'pdf' => 'application/pdf',
-            'image' => 'image/*',
-            default => 'application/octet-stream',
+        if (!$disk->exists($filePath)) {
+            abort(404);
+        }
+
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+        $mimeType = match ($extension) {
+            'ogv'   => 'video/ogg',
+            'ogg'   => ($resourceFile->file_type === 'video') ? 'video/ogg' : 'audio/ogg',
+            'webm'  => 'video/webm',
+            'mp4'   => 'video/mp4',
+            'pdf'   => 'application/pdf',
+            default => $resourceFile->mime_type ?: 'application/octet-stream',
         };
 
-        return $disk->response($resourceFile->file_path_or_url, null, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' .
-                basename($resourceFile->file_path_or_url) . '"',
-            'Accept-Ranges' => 'bytes',
+        return $disk->response($filePath, null, [
+            'Content-Type'        => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+            'Accept-Ranges'       => 'bytes',
         ]);
     }
-
     /**
      * Obtiene el árbol de archivos/directorios descargando temporalmente el archivo de B2.
      */
@@ -255,7 +273,7 @@ class ResourceUploadService
             $extension = 'tar.gz';
         }
 
-        if (!in_array($extension, ['zip', 'tar.gz', 'tgz', 'gz', 'tar'])) {
+        if (!in_array($extension, ['zip', 'tar.gz', 'tgz', 'gz', 'tar', 'rar', '7z'])) {
             return [];
         }
 

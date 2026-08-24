@@ -9,6 +9,9 @@ use App\Services\ResourceUploadService;
 use App\Strategies\FileProcessors\ImageProcessor;
 use App\Strategies\FileProcessors\PdfProcessor;
 use App\Strategies\FileProcessors\ZipProcessor;
+use App\Strategies\FileProcessors\TarGzProcessor;
+use App\Strategies\FileProcessors\RarProcessor;
+use App\Strategies\FileProcessors\SevenZipProcessor;
 use App\Strategies\FileProcessors\DefaultProcessor;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
             PdfProcessor::class,
             ZipProcessor::class,
             DefaultProcessor::class,
+            TarGzProcessor::class,
+            RarProcessor::class,
+            SevenZipProcessor::class,
         ], 'file_processors');
 
         // 3. Resolver la inyección del array de procesadores en el Servicio
