@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-indigo-400">👥 Autores y Creadores</h1>
+    <h1 class="text-3xl font-bold text-indigo-400">👥 Creadores</h1>
     <p class="text-slate-300 text-sm">Listado de usuarios registrados en la plataforma.</p>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

@@ -306,4 +306,34 @@ class ResourceUploadService
             return [];
         }
     }
+
+        /**
+     * Obtiene el contenido de un archivo de texto de forma segura con un límite de tiempo.
+     * 
+     * @param string $fileUrl URL pública, firmada de Backblaze B2 o ruta externa.
+     * @return string
+     */
+    public function getTextFileContent(string $fileUrl): string
+    {
+        try {
+            // Contexto HTTP con timeout de 3 segundos para evitar bloquear el servidor
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 3,
+                    'follow_location' => true
+                ]
+            ]);
+
+            $content = @file_get_contents($fileUrl, false, $context);
+
+            if ($content === false) {
+                return 'No se pudo leer el contenido del archivo (Error de red o archivo vacío).';
+            }
+
+            return $content;
+        } catch (\Exception $e) {
+            // Aquí puedes registrar el log si lo consideras necesario: Log::error($e->getMessage());
+            return 'Ocurrió un error inesperado al procesar el documento de texto.';
+        }
+    }
 }

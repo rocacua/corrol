@@ -42,6 +42,7 @@ class AuthController extends Controller
         $messages = [
             'name.required' => 'El nombre de usuario es obligatorio.',
             'name.max' => 'El nombre de usuario no puede tener más de 255 caracteres.',
+            'name.unique' => 'Este nombre de usuario ya está registrado.',
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'Debes introducir un correo electrónico válido.',
             'email.unique' => 'Este correo electrónico ya está registrado.',
@@ -51,7 +52,7 @@ class AuthController extends Controller
         ];
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], $messages);

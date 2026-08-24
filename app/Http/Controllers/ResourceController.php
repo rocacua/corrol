@@ -71,6 +71,7 @@ class ResourceController extends Controller
 
         $fileUrl = null;
         $fileTree = [];
+        $fileContent = null; 
         if ($resource->type === 'file' && $resource->resourceable) {
             $resourceFile = $resource->resourceable;
 
@@ -81,9 +82,17 @@ class ResourceController extends Controller
                 // Invocamos la lógica del árbol desde el servicio
                 $fileTree = $this->uploadService->getFileTree($resourceFile->file_path_or_url);
             }
+            // Invocamos la lógica de contenido de archivo de texto desde el servicio
+            $cleanUrlPath = parse_url($fileUrl, PHP_URL_PATH); 
+            $extension = strtolower(pathinfo($cleanUrlPath, PATHINFO_EXTENSION));
+            $txtExtensions = ['txt', 'md', 'markdown', 'csv', 'log', 'json', 'xml', 'yml', 'yaml'];
+            if (in_array($extension, $txtExtensions, true)) {
+                // Aquí es donde llamas a tu ResourceUploadService
+                $fileContent = $this->uploadService->getTextFileContent($fileUrl);
+            }
         }
 
-        return view('resources.show', compact('resource', 'fileUrl', 'fileTree'));
+        return view('resources.show', compact('resource', 'fileUrl', 'fileTree', 'fileContent'));
     }
 
     public function edit(int $id): View
