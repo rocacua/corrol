@@ -51,6 +51,7 @@ class MapController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
+            'resource_id' => ['nullable', 'integer', 'exists:resources,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'privacy' => ['required', 'in:public,private'],
@@ -58,14 +59,15 @@ class MapController extends Controller
             'campaign' => ['nullable', 'string', 'max:100'],
             'author' => ['nullable', 'string', 'max:100'],
             'tags' => ['nullable', 'string'],
-            'map_image_url' => ['required', 'url'],
-            'markers_json' => ['required', 'string'],
-            'resource_id' => ['nullable', 'integer'],
+            'map_image_url' => ['required', 'url', 'max:2048'],
+            'markers_json' => ['nullable', 'string'],
         ]);
 
-        $markers = json_decode($validated['markers_json'], true) ?? [];
-        $tags = !empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
-        $validated['tags'] = $tags;
+        $validated['tags'] = !empty($validated['tags'])
+            ? array_filter(array_map('trim', explode(',', $validated['tags'])))
+            : [];
+
+        $markers = !empty($validated['markers_json']) ? json_decode($validated['markers_json'], true) : [];
 
         if (!empty($validated['resource_id'])) {
             /** @var Resource|null $resource */

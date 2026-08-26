@@ -1,61 +1,61 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Crear/Editar ' . ucfirst($type) . ' - CorRol'); ?>
 
-@section('title', 'Crear/Editar ' . ucfirst($type) . ' - CorRol')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="max-w-6xl mx-auto space-y-6">
     
-    @include('partials.creation-nav')
+    <?php echo $__env->make('partials.creation-nav', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         <div class="lg:col-span-1 space-y-4">
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
                 <h3 class="font-bold text-sm text-indigo-400 mb-3 flex justify-between items-center">
-                    <span>Mis {{ ucfirst($type) }}s</span>
-                    <a href="{{ route($type === 'sheet' ? 'sheets.create' : ($type === 'diary' ? 'diaries.create' : 'campaigns.create')) }}" class="text-xs text-emerald-400 hover:underline">+ Nuevo</a>
+                    <span>Mis <?php echo e(ucfirst($type)); ?>s</span>
+                    <a href="<?php echo e(route($type === 'sheet' ? 'sheets.create' : ($type === 'diary' ? 'diaries.create' : 'campaigns.create'))); ?>" class="text-xs text-emerald-400 hover:underline">+ Nuevo</a>
                 </h3>
 
                 <div class="space-y-2 max-h-[500px] overflow-y-auto">
-                    @forelse($userResources as $res)
-                        <a href="?edit_id={{ $res->id }}" 
-                           class="block p-3 rounded-lg border text-xs transition-all {{ ($editingResource && $editingResource->id === $res->id) ? 'bg-indigo-950 border-indigo-500 text-white font-bold' : 'bg-slate-900 border-slate-700/60 text-slate-300 hover:border-indigo-500' }}">
-                            <div class="truncate">{{ $res->title }}</div>
-                            <div class="text-[10px] text-slate-400 mt-1">{{ $res->created_at->format('d/m/Y') }}</div>
+                    <?php $__empty_1 = true; $__currentLoopData = $userResources; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $res): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <a href="?edit_id=<?php echo e($res->id); ?>" 
+                           class="block p-3 rounded-lg border text-xs transition-all <?php echo e(($editingResource && $editingResource->id === $res->id) ? 'bg-indigo-950 border-indigo-500 text-white font-bold' : 'bg-slate-900 border-slate-700/60 text-slate-300 hover:border-indigo-500'); ?>">
+                            <div class="truncate"><?php echo e($res->title); ?></div>
+                            <div class="text-[10px] text-slate-400 mt-1"><?php echo e($res->created_at->format('d/m/Y')); ?></div>
                         </a>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <p class="text-xs text-slate-400 italic">No tienes ningún registro aún.</p>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-3 bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-2xl space-y-6">
             <h1 class="text-2xl font-bold text-indigo-400">
-                @if(!empty($isClone))
-                    📋 Clonar {{ ucfirst($type) }} (Nueva Copia)
-                @elseif($editingResource)
-                    ✏️ Editar {{ ucfirst($type) }}
-                @else
-                    📝 Crear Nuevo/a {{ ucfirst($type) }}
-                @endif
+                <?php if(!empty($isClone)): ?>
+                    📋 Clonar <?php echo e(ucfirst($type)); ?> (Nueva Copia)
+                <?php elseif($editingResource): ?>
+                    ✏️ Editar <?php echo e(ucfirst($type)); ?>
+
+                <?php else: ?>
+                    📝 Crear Nuevo/a <?php echo e(ucfirst($type)); ?>
+
+                <?php endif; ?>
             </h1>
 
-            <form id="sheet-form" action="{{ route('sheets.store') }}" method="POST" class="space-y-6">
-                @csrf
-                {{-- Solo enviamos resource_id si estamos editando de verdad, no al clonar --}}
-                @if($editingResource && empty($isClone))
-                    <input type="hidden" name="resource_id" value="{{ $editingResource->id }}">
-                @endif
-                <input type="hidden" name="type" value="{{ $type }}">
+            <form id="sheet-form" action="<?php echo e(route('sheets.store')); ?>" method="POST" class="space-y-6">
+                <?php echo csrf_field(); ?>
+                
+                <?php if($editingResource && empty($isClone)): ?>
+                    <input type="hidden" name="resource_id" value="<?php echo e($editingResource->id); ?>">
+                <?php endif; ?>
+                <input type="hidden" name="type" value="<?php echo e($type); ?>">
                 <input type="hidden" name="content_json" id="content_json">
 
-                @php
+                <?php
                     $defaultTitle = $editingResource ? (!empty($isClone) ? '[Copia] ' . $editingResource->title : $editingResource->title) : '';
-                @endphp
+                ?>
                 <div>
                     <label class="block text-sm font-medium mb-2">Título *</label>
-                    <input type="text" name="title" value="{{ old('title', $defaultTitle) }}" required 
+                    <input type="text" name="title" value="<?php echo e(old('title', $defaultTitle)); ?>" required 
                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
@@ -63,29 +63,29 @@
                 <div>
                     <label class="block text-sm font-medium mb-2">Descripción</label>
                     <textarea name="description" rows="3" placeholder="Resumen o notas sobre este recurso..."
-                              class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500">{{ old('description', $editingResource->description ?? '') }}</textarea>
+                              class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"><?php echo e(old('description', $editingResource->description ?? '')); ?></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Juego de Rol</label>
-                        <input type="text" name="game" list="games-list" placeholder="Ej: RuneQuest" value="{{ old('game', $editingResource->game ?? '') }}"
+                        <input type="text" name="game" list="games-list" placeholder="Ej: RuneQuest" value="<?php echo e(old('game', $editingResource->game ?? '')); ?>"
                                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500">
                         <datalist id="games-list">
-                            @foreach ($games as $g)
-                                <option value="{{ $g }}">
-                            @endforeach
+                            <?php $__currentLoopData = $games; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $g): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($g); ?>">
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </datalist>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium mb-2">Campaña</label>
-                        <input type="text" name="campaign" list="campaigns-list" placeholder="Ej: Juego de Dioses" value="{{ old('campaign', $editingResource->campaign ?? '') }}"
+                        <input type="text" name="campaign" list="campaigns-list" placeholder="Ej: Juego de Dioses" value="<?php echo e(old('campaign', $editingResource->campaign ?? '')); ?>"
                                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500">
                         <datalist id="campaigns-list">
-                            @foreach ($campaigns as $c)
-                                <option value="{{ $c }}">
-                            @endforeach
+                            <?php $__currentLoopData = $campaigns; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($c); ?>">
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </datalist>
                     </div>
                 </div>
@@ -93,8 +93,8 @@
                 <div>
                     <label class="block text-sm font-medium mb-2">Privacidad</label>
                     <select name="privacy" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none">
-                        <option value="public" {{ old('privacy', $editingResource->privacy ?? 'public') === 'public' ? 'selected' : '' }}>Público</option>
-                        <option value="private" {{ old('privacy', $editingResource->privacy ?? 'public') === 'private' ? 'selected' : '' }}>Privado</option>
+                        <option value="public" <?php echo e(old('privacy', $editingResource->privacy ?? 'public') === 'public' ? 'selected' : ''); ?>>Público</option>
+                        <option value="private" <?php echo e(old('privacy', $editingResource->privacy ?? 'public') === 'private' ? 'selected' : ''); ?>>Privado</option>
                     </select>
                 </div>
 
@@ -103,31 +103,33 @@
                 <div>
                     <label class="block text-sm font-medium mb-2">Etiquetas (Separadas por comas)</label>
                     <input type="text" id="tags-input" name="tags" placeholder="ej: pj, nivel-5, campaña-principal"
-                           value="{{ old('tags', isset($editingResource->tags) ? implode(', ', $editingResource->tags) : '') }}"
+                           value="<?php echo e(old('tags', isset($editingResource->tags) ? implode(', ', $editingResource->tags) : '')); ?>"
                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500">
                     
-                    @if(!empty($allTags))
+                    <?php if(!empty($allTags)): ?>
                     <div  class="mt-2 max-h-[60px] overflow-y-auto block">
                         <div class="mt-2 flex flex-wrap gap-2 items-center text-xs text-slate-300">
                             <span class="font-semibold text-slate-400">Sugerencias:</span>
-                            @foreach ($allTags as $tag)
-                                <button type="button" data-tag="{{ $tag }}" 
+                            <?php $__currentLoopData = $allTags; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <button type="button" data-tag="<?php echo e($tag); ?>" 
                                         class="tag-suggestion-btn bg-slate-700 hover:bg-indigo-600 text-slate-300 hover:text-white px-2 py-1 rounded-md transition-colors cursor-pointer">
-                                    + {{ $tag }}
+                                    + <?php echo e($tag); ?>
+
                                 </button>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium mb-2">Contenido de la Ficha / Diario *</label>
-                    <div id="editorjs" data-content='{!! json_encode($editingResource && $editingResource->resourceable ? ($editingResource->resourceable->content ?? new \stdClass()) : new \stdClass()) !!}' class="bg-slate-900 border border-slate-700 rounded-lg p-4 min-h-[350px] text-slate-100 cursor-text"></div>
+                    <div id="editorjs" data-content='<?php echo json_encode($editingResource && $editingResource->resourceable ? ($editingResource->resourceable->content ?? new \stdClass()) : new \stdClass()); ?>' class="bg-slate-900 border border-slate-700 rounded-lg p-4 min-h-[350px] text-slate-100 cursor-text"></div>
                 </div>
 
                 <button type="button" onclick="submitSheetForm()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">
-                    Guardar {{ ucfirst($type) }}
+                    Guardar <?php echo e(ucfirst($type)); ?>
+
                 </button>
             </form>
         </div>
@@ -612,4 +614,5 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /home/ricardo/workspace/ocanyaweb/corrol/resources/views/sheets/form.blade.php ENDPATH**/ ?>

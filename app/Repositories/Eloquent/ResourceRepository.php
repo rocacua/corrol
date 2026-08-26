@@ -83,7 +83,7 @@ class ResourceRepository implements ResourceRepositoryInterface
     {
         $userId = Auth::id();
 
-        return Resource::query()
+        $query = Resource::query()
             ->with(['resourceable', 'user'])
             ->where(function (Builder $query) use ($userId) {
                 $query->where('privacy', 'public');
@@ -91,6 +91,7 @@ class ResourceRepository implements ResourceRepositoryInterface
                     $query->orWhere('user_id', $userId);
                 }
             })
+            // Término de búsqueda general (Título, Descripción, Juego, Campaña, Autor, Contenido JSON de bloques)
             ->when(!empty($filters['q']), function (Builder $query) use ($filters) {
                 $term = trim((string) $filters['q']);
                 $query->where(function (Builder $sub) use ($term) {
@@ -98,34 +99,53 @@ class ResourceRepository implements ResourceRepositoryInterface
                         ->orWhere('description', 'like', "%{$term}%")
                         ->orWhere('game', 'like', "%{$term}%")
                         ->orWhere('campaign', 'like', "%{$term}%")
-                        ->orWhere('author', 'like', "%{$term}%");
+                        ->orWhere('author', 'like', "%{$term}%")
+                        ->orWhere('tags', 'like', "%{$term}%")
+                        ->orWhere('type', 'like', "%{$term}%")
+                        // Búsqueda en contenido de fichas/diarios/campañas (JSON)
+                        ->orWhereHasMorph('resourceable', [\App\Models\ResourceSheet::class], function (Builder $q) use ($term) {
+                            $q->where('content', 'like', "%{$term}%");
+                    });
                 });
             })
+            // Filtros específicos
             ->when(!empty($filters['game']), function (Builder $query) use ($filters) {
-                $game = trim((string) $filters['game']);
-                $query->where('game', 'like', "%{$game}%");
+                $query->where('game', 'like', "%" . trim((string) $filters['game']) . "%");
             })
             ->when(!empty($filters['campaign']), function (Builder $query) use ($filters) {
-                $campaign = trim((string) $filters['campaign']);
-                $query->where('campaign', 'like', "%{$campaign}%");
+                $query->where('campaign', 'like', "%" . trim((string) $filters['campaign']) . "%");
             })
             ->when(!empty($filters['author']), function (Builder $query) use ($filters) {
-                $author = trim((string) $filters['author']);
-                $query->where('author', 'like', "%{$author}%");
+                $query->where('author', 'like', "%" . trim((string) $filters['author']) . "%");
             })
             ->when(!empty($filters['type']), function (Builder $query) use ($filters) {
                 $query->where('type', $filters['type']);
             })
             ->when(!empty($filters['tag']), function (Builder $query) use ($filters) {
-                $tag = trim((string) $filters['tag']);
-                $query->whereJsonContains('tags', $tag);
+                $query->whereJsonContains('tags', trim((string) $filters['tag']));
             })
             ->when(!empty($filters['user_id']), function (Builder $query) use ($filters) {
                 $query->where('user_id', $filters['user_id']);
             })
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
+            // Filtro por Rangos de Fecha de Publicación
+            ->when(!empty($filters['date_from']), function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '>=', $filters['date_from']);
+            })
+            ->when(!empty($filters['date_to']), function (Builder $query) use ($filters) {
+                $query->whereDate('created_at', '<=', $filters['date_to']);
+            });
+
+        // Ordenación dinámica
+        $sort = $filters['sort'] ?? 'latest';
+        match ($sort) {
+            'oldest' => $query->oldest(),
+            'title_asc' => $query->orderBy('title', 'asc'),
+            'title_desc' => $query->orderBy('title', 'desc'),
+            'type' => $query->orderBy('type', 'asc')->latest(),
+            default => $query->latest(),
+        };
+
+        return $query->paginate(12)->withQueryString();
     }
 
     public function updateResource(Resource $resource, array $data): Resource

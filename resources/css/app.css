@@ -36,3 +36,31 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* JERARQUIA DE ENCABEZADOS
+h1 {
+    font-weight: bold;
+    font-size: var(--text-3xl);
+}
+h2 {
+    font-weight: bold;
+    font-size: var(--text-2xl);
+}
+h3 {
+    font-weight: bold;
+    font-size: var(--text-lg);
+}
+h4{
+    font-weight: bold;
+    font-size: var(--text-base);
+    text-decoration: underline;
+}
+h5 {
+    font-weight: bold;
+    font-size: var(--text-base);
+}
+h6 {
+    font-weight: bold;
+    font-size: var(--text-base);
+    font-style: italic;
+}*/

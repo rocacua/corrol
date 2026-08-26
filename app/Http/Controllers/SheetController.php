@@ -74,6 +74,7 @@ class SheetController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
+            'resource_id' => ['nullable', 'integer', 'exists:resources,id'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'privacy' => ['required', 'in:public,private'],
@@ -86,9 +87,11 @@ class SheetController extends Controller
             'resource_id' => ['nullable', 'integer'],
         ]);
 
-        $content = json_decode($validated['content_json'], true) ?? [];
-        $tags = !empty($validated['tags']) ? array_map('trim', explode(',', $validated['tags'])) : [];
-        $validated['tags'] = $tags;
+        $validated['tags'] = !empty($validated['tags'])
+            ? array_filter(array_map('trim', explode(',', $validated['tags'])))
+            : [];
+
+        $content = !empty($validated['content_json']) ? json_decode($validated['content_json'], true) : [];
 
         if (!empty($validated['resource_id'])) {
             /** @var Resource|null $resource */

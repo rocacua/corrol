@@ -49,7 +49,9 @@ class ResourceController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->only(['q', 'game', 'campaign', 'author', 'type', 'tag', 'user_id']);
+        $filters = $request->only([
+            'q', 'game', 'campaign', 'author', 'type', 'tag', 'user_id', 'date_from', 'date_to', 'sort'
+        ]);
         $resources = $this->resourceRepository->searchResources($filters);
 
         $games = $this->resourceRepository->getUniqueValues('game');
