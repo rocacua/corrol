@@ -86,9 +86,9 @@ class ResourceController extends Controller
                 $fileUrl = $resourceFile->file_path_or_url;
             } else {
                 $fileUrl = $this->uploadService->getFileUrl($resourceFile->file_path_or_url, 15);
-                // Invocamos la lógica del árbol desde el servicio
-                $fileTree = $this->uploadService->getFileTree($resourceFile->file_path_or_url);
             }
+            // Invocamos la lógica del árbol desde el servicio tanto para locales (B2) como externos
+            $fileTree = $this->uploadService->getFileTree($resourceFile->file_path_or_url, $resourceFile->is_external);
             // Invocamos la lógica de contenido de archivo de texto desde el servicio
             $cleanUrlPath = parse_url($fileUrl, PHP_URL_PATH); 
             $extension = strtolower(pathinfo($cleanUrlPath, PATHINFO_EXTENSION));

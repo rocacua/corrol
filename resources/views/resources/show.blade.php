@@ -420,11 +420,21 @@
                     </div>
 
                 @else
-                    <iframe
-                        src="{{ $fileUrl }}"
-                        class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"
-                        sandbox="allow-same-origin"
-                    ></iframe>
+                    <div class="w-full space-y-4">
+                        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                            <span class="text-slate-300 font-semibold flex items-center gap-2">
+                                🌐 Documento Web
+                            </span>
+                            <a href="{{ $fileUrl }}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-md transition-colors shadow flex items-center gap-1.5">
+                                ↗️ Abrir en nueva pestaña
+                            </a>
+                        </div>
+                        <iframe
+                            src="{{ $fileUrl }}"
+                            class="w-full h-[650px] rounded-lg border border-slate-700 bg-white"
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+                        ></iframe>
+                    </div>
                 @endif
             
             @elseif($type === 'audio')

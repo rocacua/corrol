@@ -85,6 +85,7 @@ class ResourceRepository implements ResourceRepositoryInterface
 
         $query = Resource::query()
             ->with(['resourceable', 'user'])
+            ->withCount('favoritedBy')
             ->where(function (Builder $query) use ($userId) {
                 $query->where('privacy', 'public');
                 if ($userId) {
@@ -137,13 +138,28 @@ class ResourceRepository implements ResourceRepositoryInterface
 
         // Ordenación dinámica
         $sort = $filters['sort'] ?? 'latest';
-        match ($sort) {
-            'oldest' => $query->oldest(),
-            'title_asc' => $query->orderBy('title', 'asc'),
-            'title_desc' => $query->orderBy('title', 'desc'),
-            'type' => $query->orderBy('type', 'asc')->latest(),
-            default => $query->latest(),
-        };
+        
+        if ($sort === 'affinity' && $userId) {
+            $favSubquery = DB::table('favorite_resources')
+                ->selectRaw('count(*)')
+                ->whereColumn('favorite_resources.resource_id', 'resources.id')
+                ->where('favorite_resources.user_id', (int) $userId);
+
+            $currentUserId = (int) $userId;
+
+            $query->orderByDesc($favSubquery)
+                  ->orderByRaw("CASE WHEN user_id = {$currentUserId} THEN 1 ELSE 0 END DESC")
+                  ->orderByRaw("CASE WHEN privacy = 'private' THEN 1 ELSE 0 END DESC")
+                  ->latest();
+        } else {
+            match ($sort) {
+                'oldest' => $query->oldest(),
+                'title_asc' => $query->orderBy('title', 'asc'),
+                'title_desc' => $query->orderBy('title', 'desc'),
+                'type' => $query->orderBy('type', 'asc')->latest(),
+                default => $query->latest(),
+            };
+        }
 
         return $query->paginate(12)->withQueryString();
     }
@@ -314,6 +330,7 @@ class ResourceRepository implements ResourceRepositoryInterface
                 $q->where('user_id', $targetUserId);
             })
             ->with(['resourceable', 'user'])
+            ->withCount('favoritedBy')
             ->where(function (Builder $query) use ($viewerUserId) {
                 $query->where('privacy', 'public');
                 if ($viewerUserId) {

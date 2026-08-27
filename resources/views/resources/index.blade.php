@@ -9,8 +9,23 @@
         
         <!-- ENCABEZADO CON BÚSQUEDA GENERAL DE ACCESO RÁPIDO -->
         <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-            <h1 class="text-3xl font-bold text-indigo-400 shrink-0">🎲 Explorador de Recursos</h1>
-            
+            <div>
+                <h1 class="text-3xl font-bold text-indigo-400 shrink-0">🎲 Explorador de Recursos</h1>
+                @if($resources->total() > 0)
+                    @php
+                        $pageFavs = $resources->filter(fn($r) => ($r->favorited_by_count ?? 0) > 0)->count();
+                    @endphp
+                    <p class="text-xs text-slate-400 mt-1">
+                        Encontrado <strong class="text-indigo-300">{{ $resources->total() }}</strong> recursos.
+                        @if($pageFavs > 0)
+                            <strong class="text-amber-400">{{ $pageFavs }}</strong> favoritos.
+                        @endif
+                    </p>
+                @else
+                    <p class="text-xs text-slate-400 mt-1">Explora la colección pública de CorRol.</p>
+                @endif
+            </div>
+
             <div class="flex flex-wrap items-center gap-3 md:w-auto flex-1 md:flex-initial justify-end">
                 <!-- Campo Búsqueda General -->
                 <div class="relative sm:w-64">
@@ -104,6 +119,7 @@
                     <select name="sort" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100">
                         <option value="latest" {{ ($filters['sort'] ?? '') === 'latest' ? 'selected' : '' }}>Más recientes primero</option>
                         <option value="oldest" {{ ($filters['sort'] ?? '') === 'oldest' ? 'selected' : '' }}>Más antiguos primero</option>
+                        <option value="affinity" {{ ($filters['sort'] ?? '') === 'affinity' ? 'selected' : '' }}>Afinidad (Favoritos y Propios primero)</option>
                         <option value="title_asc" {{ ($filters['sort'] ?? '') === 'title_asc' ? 'selected' : '' }}>Título (A-Z)</option>
                         <option value="title_desc" {{ ($filters['sort'] ?? '') === 'title_desc' ? 'selected' : '' }}>Título (Z-A)</option>
                         <option value="type" {{ ($filters['sort'] ?? '') === 'type' ? 'selected' : '' }}>Tipo de Recurso</option>
@@ -130,17 +146,20 @@
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-2">
                             <span class="px-2.5 py-0.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold rounded-full uppercase">
-                                {{ $resource->type }}
+                                {{ $resource->type == 'file' ? $resource->resourceable->file_type : $resource->type }}
                             </span>
                             <span class="text-xs {{ $resource->privacy === 'private' ? 'text-amber-400' : 'text-emerald-400' }}">
                                 {{ ucfirst($resource->privacy) }}
                                 <br /><span class="text-[10px] text-slate-400">{{ $resource->created_at->format('d/m/Y') }}</span>
+                                @if(($resource->favorited_by_count ?? 0) > 0)
+                                    <br /><span class="text-[10px] text-amber-400 font-bold" title="Favorito de {{ $resource->favorited_by_count }} usuarios">⭐ {{ $resource->favorited_by_count }}</span>
+                                @endif
                             </span>
                             <span class="text-xs text-slate-300">
                                 <strong class="text-slate-200">
-                                    {{ $resource->game ?? 'General' }}<br />
-                                    {{ $resource->campaign ?? '' }}<br />
-                                    {{ $resource->author ?? 'Anónimo' }}
+                                    🎲 {{ $resource->game ?? 'General' }}<br />
+                                    📜 {{ $resource->campaign ?? '' }}<br />
+                                    ✍️ {{ $resource->author ?? 'Anónimo' }}
                                 </strong>
                             </span>
                         </div>

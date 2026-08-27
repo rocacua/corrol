@@ -87,35 +87,76 @@ Route::post('/resources/{resource}/favorite', [\App\Http\Controllers\FavoriteCon
 | Ruta de Mantenimiento y Setup para Hosting Compartido (Strato sin SSH)
 |--------------------------------------------------------------------------
 */
-Route::get('/strato-setup', function (\Illuminate\Http\Request $request) {
-    $secretKey = env('SETUP_SECRET_KEY', 'MiClaveDeSeguridad123!');
+// Route::get('/strato-setup', function (\Illuminate\Http\Request $request) {
+//     try {
+//         $keyFromConfig = config('app.setup_secret_key');
+//         $keyFromEnv = env('SETUP_SECRET_KEY');
+//         $providedKey = $request->get('key');
 
-    if ($request->get('key') !== $secretKey) {
-        abort(403, 'Acceso denegado: Clave de seguridad incorrecta.');
-    }
+//         $targetKey = $keyFromConfig ?: $keyFromEnv;
 
-    $output = [];
+//         if (!$providedKey || !$targetKey || $providedKey !== $targetKey) {
+//             return response("<pre>❌ 403 Acceso Denegado.\n\nLa clave introducida en la URL no coincide con la variable SETUP_SECRET_KEY de Strato.</pre>", 403);
+//         }
 
-    // 1. Ejecutar migraciones de base de datos
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    $output[] = "✅ Migraciones ejecuadas: " . \Illuminate\Support\Facades\Artisan::output();
+//         $output = [];
 
-    // 2. Crear enlace simbólico público de storage
-    try {
-        \Illuminate\Support\Facades\Artisan::call('storage:link');
-        $output[] = "✅ Enlace simbólico de Storage generado.";
-    } catch (\Exception $e) {
-        $output[] = "⚠️ Symlink: " . $e->getMessage();
-    }
+//         // 0. Limpiar cachés antiguas
+//         try {
+//             \Illuminate\Support\Facades\Artisan::call('config:clear');
+//             \Illuminate\Support\Facades\Artisan::call('route:clear');
+//             \Illuminate\Support\Facades\Artisan::call('view:clear');
+//             $output[] = "🧹 Cachés antiguas limpiadas.";
+//         } catch (\Throwable $e) {
+//             $output[] = "⚠️ Limpieza de caché: " . $e->getMessage();
+//         }
 
-    // 3. Generar cachés de producción con las rutas reales del servidor de Strato
-    \Illuminate\Support\Facades\Artisan::call('config:cache');
-    \Illuminate\Support\Facades\Artisan::call('route:cache');
-    \Illuminate\Support\Facades\Artisan::call('view:cache');
-    $output[] = "🚀 Cachés de producción generadas en Strato.";
+//         // 1. Limpiar automáticamente las tablas antiguas 'cr_' antes de migrar
+//         try {
+//             \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
+//             $tables = \Illuminate\Support\Facades\DB::select("SHOW TABLES LIKE 'cr_%'");
+//             foreach ($tables as $table) {
+//                 $tableName = array_values((array)$table)[0];
+//                 \Illuminate\Support\Facades\DB::statement("DROP TABLE IF EXISTS `{$tableName}`");
+//             }
+//             \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
+//             $output[] = "🗑️ Tablas antiguas 'cr_' eliminadas de la base de datos.";
+//         } catch (\Throwable $e) {
+//             $output[] = "⚠️ Limpieza de tablas SQL: " . $e->getMessage();
+//         }
 
-    return response('<pre>' . implode("\n", $output) . '</pre>');
-});
+//         // 2. Ejecutar migraciones de base de datos desde cero
+//         try {
+//             \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+//             $output[] = "✅ Migraciones ejecutadas limpias:\n" . \Illuminate\Support\Facades\Artisan::output();
+//         } catch (\Throwable $e) {
+//             $output[] = "❌ Error en Migraciones: " . $e->getMessage();
+//         }
+
+//         // 3. Crear enlace simbólico de storage
+//         try {
+//             \Illuminate\Support\Facades\Artisan::call('storage:link');
+//             $output[] = "✅ Enlace simbólico de Storage generado.";
+//         } catch (\Throwable $e) {
+//             $output[] = "⚠️ Symlink Storage: " . $e->getMessage();
+//         }
+
+//         // 4. Generar cachés de producción
+//         try {
+//             \Illuminate\Support\Facades\Artisan::call('config:cache');
+//             \Illuminate\Support\Facades\Artisan::call('route:cache');
+//             \Illuminate\Support\Facades\Artisan::call('view:cache');
+//             $output[] = "🚀 Cachés de producción optimizadas con éxito.";
+//         } catch (\Throwable $e) {
+//             $output[] = "⚠️ Caché de producción: " . $e->getMessage();
+//         }
+
+//         return response('<pre>' . implode("\n\n", $output) . '</pre>');
+
+//     } catch (\Throwable $e) {
+//         return response('<pre>❌ Error grave 500:\n\n' . $e->getMessage() . '</pre>', 500);
+//     }
+// });
 
 // 🔑 Ruta de Activación Secreta de Admin usando SETUP_SECRET_KEY (Solo accesible si estás logueado)
 Route::get('/secret-claim-admin/{secretKey}', [\App\Http\Controllers\Admin\AdminController::class, 'claimAdmin'])
@@ -130,3 +171,6 @@ Route::middleware(['auth', 'admin'])->prefix('secret-admin-panel')->group(functi
     Route::get('/mailing', [\App\Http\Controllers\Admin\AdminController::class, 'mailingForm'])->name('admin.mailing');
     Route::post('/mailing/send', [\App\Http\Controllers\Admin\AdminController::class, 'sendMailing'])->name('admin.mailing.send');
 });
+
+// En lugar de redireccionar con redirect():
+Route::get('/', [ResourceController::class, 'index'])->name('home');

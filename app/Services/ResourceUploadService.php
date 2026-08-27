@@ -83,19 +83,22 @@ class ResourceUploadService
         $ext = strtolower($pathInfo['extension'] ?? '');
 
         $fileType = 'document';
-        if (in_array($ext, ['pdf'])) {
+        if (in_array($ext, ['pdf'], true)) {
             $fileType = 'pdf';
-        } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+        } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'], true)) {
             $fileType = 'image';
-        } elseif (in_array($ext, ['mp3', 'wav', 'ogg'])) {
+        } elseif (in_array($ext, ['mp3', 'wav', 'ogg'], true)) {
             $fileType = 'audio';
-        } elseif (in_array($ext, ['mp4', 'webm', 'ogv'])) {
+        } elseif (in_array($ext, ['mp4', 'webm', 'ogv'], true)) {
             $fileType = 'video';
-        } elseif (in_array($ext, ['zip', 'rar', '7z', 'gz'])) {
+        } elseif (in_array($ext, ['zip', 'rar', '7z', 'gz', 'tar', 'tgz'], true)) {
             $fileType = 'zip';
         }
 
-        $metadata = ['file_type' => $fileType];
+        $metadata = [
+            'file_type' => $fileType,
+            'archive_format' => $ext ?: 'zip',
+        ];
 
         return $this->resourceRepository->createFileResource($data, $url, $metadata);
     }
@@ -265,30 +268,40 @@ class ResourceUploadService
     /**
      * Obtiene el árbol de archivos/directorios descargando temporalmente el archivo de B2.
      */
-    public function getFileTree(string $filePath): array
+    public function getFileTree(string $filePathOrUrl, bool $isExternal = false): array
     {
-        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $cleanPath = parse_url($filePathOrUrl, PHP_URL_PATH) ?? '';
+        $extension = strtolower(pathinfo($cleanPath, PATHINFO_EXTENSION));
         
-        if (str_ends_with(strtolower($filePath), '.tar.gz') || str_ends_with(strtolower($filePath), '.tgz')) {
+        if (str_ends_with(strtolower($cleanPath), '.tar.gz') || str_ends_with(strtolower($cleanPath), '.tgz')) {
             $extension = 'tar.gz';
         }
 
-        if (!in_array($extension, ['zip', 'tar.gz', 'tgz', 'gz', 'tar', 'rar', '7z'])) {
+        if (!in_array($extension, ['zip', 'tar.gz', 'tgz', 'gz', 'tar', 'rar', '7z'], true)) {
             return [];
         }
 
         $tempPath = sys_get_temp_dir() . '/' . uniqid('res_tree_') . '.' . $extension;
 
         try {
-            /** @var FilesystemAdapter $disk */
-            $disk = Storage::disk('b2');
+            if ($isExternal || str_starts_with($filePathOrUrl, 'http://') || str_starts_with($filePathOrUrl, 'https://')) {
+                // Descarga temporal con timeout para inspeccionar la estructura de la URL externa
+                $response = Http::timeout(10)->withoutVerifying()->get($filePathOrUrl);
+                if (!$response->successful()) {
+                    return [];
+                }
+                file_put_contents($tempPath, $response->body());
+            } else {
+                /** @var FilesystemAdapter $disk */
+                $disk = Storage::disk('b2');
 
-            if (!$disk->exists($filePath)) {
-                return [];
+                if (!$disk->exists($filePathOrUrl)) {
+                    return [];
+                }
+
+                $fileContent = $disk->get($filePathOrUrl);
+                file_put_contents($tempPath, $fileContent);
             }
-
-            $fileContent = $disk->get($filePath);
-            file_put_contents($tempPath, $fileContent);
 
             $processor = FileProcessorFactory::make($extension);
             $tree = $processor->getContentsTree($tempPath);

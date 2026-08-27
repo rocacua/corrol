@@ -125,9 +125,9 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Clave Secreta de Activación Admin
+    | Clave Secreta de Activación / Setup
     |--------------------------------------------------------------------------
     */
     'setup_secret_key' => env('SETUP_SECRET_KEY'),
-
+    
 ];
