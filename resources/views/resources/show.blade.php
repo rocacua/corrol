@@ -89,55 +89,55 @@
             </div>
         @endif
 
-<!-- Botones de Acción (Editar, Eliminar, Favorito y Clonar) -->
-@auth
-    <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t border-slate-700/60 items-center">
-        
-        {{-- Botón Marcar / Quitar de Favoritos --}}
-        <form action="{{ route('resources.favorite.toggle', $resource->id) }}" method="POST">
-            @csrf
-            <button type="submit" class="font-bold px-4 py-2 rounded-lg text-sm shadow transition-colors flex items-center gap-1.5 {{ $isFavorited ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200' }}">
-                {{ $isFavorited ? '⭐ Quitar de Favoritos' : '☆ Añadir a Favoritos' }}
-            </button>
-        </form>
+        <!-- Botones de Acción (Editar, Eliminar, Favorito y Clonar) -->
+        @auth
+            <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t border-slate-700/60 items-center">
+                
+                {{-- Botón Marcar / Quitar de Favoritos --}}
+                <form action="{{ route('resources.favorite.toggle', $resource->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="font-bold px-4 py-2 rounded-lg text-sm shadow transition-colors flex items-center gap-1.5 {{ $isFavorited ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-200' }}">
+                        {{ $isFavorited ? '⭐ Quitar de Favoritos' : '☆ Añadir a Favoritos' }}
+                    </button>
+                </form>
 
-        {{-- Botón Clonar / Usar como Plantilla --}}
-        @if(in_array($resource->type, ['sheet', 'diary', 'campaign', 'map']))
-            @php
-                $cloneRoute = in_array($resource->type, ['sheet', 'diary', 'campaign'])
-                    ? route('sheets.create', ['clone_id' => $resource->id, 'type' => $resource->type])
-                    : route('maps.create', ['clone_id' => $resource->id]);
-            @endphp
-            <a href="{{ $cloneRoute }}" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-sm shadow transition-colors flex items-center gap-1.5">
-                📋 Clonar / Usar como Plantilla
-            </a>
-        @endif
+                {{-- Botón Clonar / Usar como Plantilla --}}
+                @if(in_array($resource->type, ['sheet', 'diary', 'campaign', 'map']))
+                    @php
+                        $cloneRoute = in_array($resource->type, ['sheet', 'diary', 'campaign'])
+                            ? route('sheets.create', ['clone_id' => $resource->id, 'type' => $resource->type])
+                            : route('maps.create', ['clone_id' => $resource->id]);
+                    @endphp
+                    <a href="{{ $cloneRoute }}" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-sm shadow transition-colors flex items-center gap-1.5">
+                        📋 Clonar / Usar como Plantilla
+                    </a>
+                @endif
 
-        {{-- Botones Editar y Eliminar (Solo Propietario o Recursos Anónimos) --}}
-        @if($resource->user_id === null || $resource->user_id === auth()->id())
-            @php
-                $editRoute = route('resources.edit', $resource->id);
-                if(in_array($resource->type, ['sheet', 'diary', 'campaign'])) {
-                    $editRoute = route('sheets.create', ['edit_id' => $resource->id]);
-                } elseif($resource->type === 'map') {
-                    $editRoute = route('maps.create', ['edit_id' => $resource->id]);
-                }
-            @endphp
-            
-            <a href="{{ $editRoute }}" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
-                ✏️ Editar Recurso
-            </a>
+                {{-- Botones Editar y Eliminar (Solo Propietario o Recursos Anónimos) --}}
+                @if($resource->user_id === null || $resource->user_id === auth()->id())
+                    @php
+                        $editRoute = route('resources.edit', $resource->id);
+                        if(in_array($resource->type, ['sheet', 'diary', 'campaign'])) {
+                            $editRoute = route('sheets.create', ['edit_id' => $resource->id]);
+                        } elseif($resource->type === 'map') {
+                            $editRoute = route('maps.create', ['edit_id' => $resource->id]);
+                        }
+                    @endphp
+                    
+                    <a href="{{ $editRoute }}" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                        ✏️ Editar Recurso
+                    </a>
 
-            <form action="{{ route('resources.destroy', $resource->id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este recurso?');" class="inline">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
-                    🗑️ Eliminar Recurso
-                </button>
-            </form>
-        @endif
-    </div>
-@endauth
+                    <form action="{{ route('resources.destroy', $resource->id) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este recurso?');" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-4 py-2 rounded-lg text-sm">
+                            🗑️ Eliminar Recurso
+                        </button>
+                    </form>
+                @endif
+            </div>
+        @endauth
 
     <!-- VISOR CONTENEDOR DE RECURSO -->
     <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-xl min-h-[400px] flex items-center justify-center">
@@ -491,78 +491,78 @@
                 </video>
 
             <!-- VISOR 6: ARCHIVOS COMPRIMIDOS (ZIP, TAR.GZ, TGZ, RAR, 7Z) -->
-@elseif($type === 'zip')
-    @php
-        $formatLabel = strtoupper($metadata['archive_format'] ?? 'Comprimido');
-        $treeList = !empty($fileTree) ? $fileTree : ($metadata['structure'] ?? []);
-        
-        // Comprobación real: Si es RAR/7Z y el árbol está completamente vacío, es que el servidor no ha podido leerlo
-        $isRarOr7z = in_array(strtolower($formatLabel), ['rar', '7z'], true);
-        $failedToProcess = $isRarOr7z && empty($treeList);
-    @endphp
-    <div class="w-full space-y-4">
-        <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
-            <span class="text-indigo-300 font-bold flex items-center gap-2">
-                📦 Estructura del Archivo ({{ $formatLabel }})
-            </span>
-            @if(count($treeList) > 0)
-                <span class="text-slate-300">{{ count($treeList) }} elementos encontrados</span>
-            @endif
-        </div>
-
-        @if(count($treeList) > 0)
-            <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm max-h-[500px] overflow-y-auto space-y-1 border border-slate-700 select-text">
-                @foreach($treeList as $item)
-                    @php
-                        $cleanPath = rtrim($item['path'] ?? $item['name'], '/');
-                        $depth = $cleanPath !== '' ? substr_count($cleanPath, '/') : 0;
-                        $paddingClass = match (min($depth, 6)) {
-                            1 => 'pl-5',
-                            2 => 'pl-10',
-                            3 => 'pl-15',
-                            4 => 'pl-20',
-                            5 => 'pl-25',
-                            6 => 'pl-30',
-                            default => 'pl-0',
-                        };
-                    @endphp
-                    <div class="flex justify-between items-center py-1 border-b border-slate-800/50 hover:bg-slate-800/50 rounded px-2 transition-colors {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }} {{ $paddingClass }}">
-                        
-                        <span class="truncate pr-4 flex items-center gap-2">
-                            <span class="text-base leading-none">{{ $item['is_dir'] ? '📁' : '📄' }}</span>
-                            <span class="font-semibold">{{ $item['name'] }}</span>
-                            <span class="text-slate-400 font-normal text-xs hidden md:inline">({{ $cleanPath }})</span>
+            @elseif($type === 'zip')
+                @php
+                    $formatLabel = strtoupper($metadata['archive_format'] ?? 'Comprimido');
+                    $treeList = !empty($fileTree) ? $fileTree : ($metadata['structure'] ?? []);
+                    
+                    // Comprobación real: Si es RAR/7Z y el árbol está completamente vacío, es que el servidor no ha podido leerlo
+                    $isRarOr7z = in_array(strtolower($formatLabel), ['rar', '7z'], true);
+                    $failedToProcess = $isRarOr7z && empty($treeList);
+                @endphp
+                <div class="w-full space-y-4">
+                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-700 text-xs">
+                        <span class="text-indigo-300 font-bold flex items-center gap-2">
+                            📦 Estructura del Archivo ({{ $formatLabel }})
                         </span>
-
-                        <span class="text-slate-400 text-xs shrink-0 font-mono">
-                            @if($item['is_dir'])
-                                <span class="bg-indigo-950 text-indigo-400 text-[10px] px-1.5 py-0.5 rounded border border-indigo-800/40">Carpeta</span>
-                            @else
-                                {{ $item['size'] > 0 ? number_format($item['size'] / 1024, 1) . ' KB' : '0 KB' }}
-                            @endif
-                        </span>
+                        @if(count($treeList) > 0)
+                            <span class="text-slate-300">{{ count($treeList) }} elementos encontrados</span>
+                        @endif
                     </div>
-                @endforeach
-            </div>
-        @else
-            <div class="p-6 bg-slate-900 rounded-lg border border-slate-700 text-center space-y-3">
-                <p class="text-slate-300 text-sm">Contenido empaquetado en formato {{ $formatLabel }}.</p>
-                
-                @if($failedToProcess)
-                    <p class="text-amber-400 text-xs italic bg-amber-950/40 border border-amber-500/30 p-3 rounded-lg max-w-xl mx-auto">
-                        ⚠️ Nota: La previsualización de directorios para archivos .RAR/.7Z no está disponible en este servidor debido a limitaciones técnicas de la infraestructura. Puedes descargar el archivo para inspeccionar o extraer su contenido.
-                    </p>
-                @endif
-                
-                @if($fileUrl)
-                    <a href="{{ $fileUrl }}" download target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow">
-                         Descargar {{ $formatLabel }} Completo
-                    </a>
-                @endif
-            </div>
-        @endif
-    </div>
-@endif
+
+                    @if(count($treeList) > 0)
+                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm max-h-[500px] overflow-y-auto space-y-1 border border-slate-700 select-text">
+                            @foreach($treeList as $item)
+                                @php
+                                    $cleanPath = rtrim($item['path'] ?? $item['name'], '/');
+                                    $depth = $cleanPath !== '' ? substr_count($cleanPath, '/') : 0;
+                                    $paddingClass = match (min($depth, 6)) {
+                                        1 => 'pl-5',
+                                        2 => 'pl-10',
+                                        3 => 'pl-15',
+                                        4 => 'pl-20',
+                                        5 => 'pl-25',
+                                        6 => 'pl-30',
+                                        default => 'pl-0',
+                                    };
+                                @endphp
+                                <div class="flex justify-between items-center py-1 border-b border-slate-800/50 hover:bg-slate-800/50 rounded px-2 transition-colors {{ $item['is_dir'] ? 'text-indigo-300 font-bold' : 'text-slate-300' }} {{ $paddingClass }}">
+                                    
+                                    <span class="truncate pr-4 flex items-center gap-2">
+                                        <span class="text-base leading-none">{{ $item['is_dir'] ? '📁' : '📄' }}</span>
+                                        <span class="font-semibold">{{ $item['name'] }}</span>
+                                        <span class="text-slate-400 font-normal text-xs hidden md:inline">({{ $cleanPath }})</span>
+                                    </span>
+
+                                    <span class="text-slate-400 text-xs shrink-0 font-mono">
+                                        @if($item['is_dir'])
+                                            <span class="bg-indigo-950 text-indigo-400 text-[10px] px-1.5 py-0.5 rounded border border-indigo-800/40">Carpeta</span>
+                                        @else
+                                            {{ $item['size'] > 0 ? number_format($item['size'] / 1024, 1) . ' KB' : '0 KB' }}
+                                        @endif
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-6 bg-slate-900 rounded-lg border border-slate-700 text-center space-y-3">
+                            <p class="text-slate-300 text-sm">Contenido empaquetado en formato {{ $formatLabel }}.</p>
+                            
+                            @if($failedToProcess)
+                                <p class="text-amber-400 text-xs italic bg-amber-950/40 border border-amber-500/30 p-3 rounded-lg max-w-xl mx-auto">
+                                    ⚠️ Nota: La previsualización de directorios para archivos .RAR/.7Z no está disponible en este servidor debido a limitaciones técnicas de la infraestructura. Puedes descargar el archivo para inspeccionar o extraer su contenido.
+                                </p>
+                            @endif
+                            
+                            @if($fileUrl)
+                                <a href="{{ $fileUrl }}" download target="_blank" class="inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-lg text-sm transition-colors shadow">
+                                    Descargar {{ $formatLabel }} Completo
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            @endif
 
         <!-- VISOR 2: MAPA INTERACTIVO -->
         @elseif($resource->type === 'map')
