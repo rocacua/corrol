@@ -37,21 +37,24 @@
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col justify-between hover:border-indigo-500 transition-colors">
                     <div>
                         <div class="flex justify-between items-start gap-2 mb-2">
-                            <span class="px-2.5 py-0.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold rounded-full uppercase">
+                            <span class="px-2.5 py-0.5 bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold rounded-full uppercase shrink-0">
                                 {{ $resource->type == 'file' ? $resource->resourceable->file_type : $resource->type }}
                             </span>
-                            <span class="text-xs {{ $resource->privacy === 'private' ? 'text-amber-400' : 'text-emerald-400' }}">
+                            <span class="text-xs {{ $resource->privacy === 'private' ? 'text-amber-400' : 'text-emerald-400' }} shrink-0">
                                 {{ ucfirst($resource->privacy) }}
                                 <br /><span class="text-[10px] text-slate-400">{{ $resource->created_at->format('d/m/Y') }}</span>
                                 @if(($resource->favorited_by_count ?? 0) > 0)
                                     <br /><span class="text-[10px] text-amber-400 font-bold" title="Favorito de {{ $resource->favorited_by_count }} usuarios">⭐ {{ $resource->favorited_by_count }}</span>
                                 @endif
                             </span>
-                            <span class="text-xs text-slate-300">
-                                <strong class="text-slate-200">
-                                    🎲 {{ $resource->game ?? 'General' }}<br />
-                                    📜 {{ $resource->campaign ?? '' }}<br />
-                                    ✍️ {{ $resource->author ?? 'Anónimo' }}
+                            {{-- Bloque de Metadatos con Ancho Máximo y Truncado --}}
+                            <span class="text-xs text-slate-300 min-w-0 max-w-[150px] sm:max-w-[180px] md:max-w-[200px] text-right">
+                                <strong class="text-slate-200 block min-w-0">
+                                    <span class="block truncate" title="🎲 {{ $resource->game ?? 'General' }}">🎲 {{ $resource->game ?? 'General' }}</span>
+                                    @if($resource->campaign)
+                                        <span class="block truncate mt-0.5" title="📜 {{ $resource->campaign }}">📜 {{ $resource->campaign }}</span>
+                                    @endif
+                                    <span class="block truncate mt-0.5" title="✍️ {{ $resource->author ?? 'Anónimo' }}">✍️ {{ $resource->author ?? 'Anónimo' }}</span>
                                 </strong>
                             </span>
                         </div>
