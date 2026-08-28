@@ -14,7 +14,7 @@
                 </span>
                 <h1 class="text-3xl font-bold text-slate-100">{{ $resource->title }}</h1>
                 @if($resource->description)
-                    <p class="text-slate-300 mt-2">{{ $resource->description }}</p>
+                    <p class="text-slate-300 mt-2 whitespace-pre-line">{!! preg_replace('/(https?:\/\/[^\s<]+)/i', '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline font-medium">$1</a>', e($resource->description)) !!}</p>
                 @endif
             </div>
 

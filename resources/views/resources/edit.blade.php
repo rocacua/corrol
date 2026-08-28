@@ -51,6 +51,7 @@
             <label class="block text-sm font-medium mb-2">Descripción</label>
             <textarea name="description" rows="3" 
                       class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none">{{ old('description', $resource->description) }}</textarea>
+            <p class="text-xs text-slate-400 mt-1">💡 Las URLs que incluyas en la descripción (ej: <code>https://ejemplo.com</code>) se convertirán automáticamente en enlaces.</p>
         </div>
 
         <!-- Juego, Campaña, Autor y Privacidad -->
