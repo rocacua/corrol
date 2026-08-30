@@ -136,6 +136,9 @@ class ResourceRepository implements ResourceRepositoryInterface
                 $query->whereDate('created_at', '<=', $filters['date_to']);
             });
 
+         // 1. Calculamos el total de favoritos globales que cumplen con los filtros usando una subconsulta
+        // Contamos cuántos registros de la consulta filtrada tienen al menos 1 favorito
+        $totalFavorited = (clone $query)->whereHas('favoritedBy')->count();
         // Ordenación dinámica
         $sort = $filters['sort'] ?? 'latest';
         
@@ -161,7 +164,11 @@ class ResourceRepository implements ResourceRepositoryInterface
             };
         }
 
-        return $query->paginate(12)->withQueryString();
+        // 2. Ejecutamos la paginación
+        $paginator = $query->paginate(12)->withQueryString();
+        // 3. Inyectamos la propiedad dinámica al paginador para usarla en la vista
+        $paginator->total_favorited = $totalFavorited;
+        return $paginator;
     }
 
     public function updateResource(Resource $resource, array $data): Resource

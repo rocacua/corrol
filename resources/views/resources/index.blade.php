@@ -13,12 +13,12 @@
                 <h1 class="text-3xl font-bold text-indigo-400 shrink-0">🎲 Explorador de Recursos</h1>
                 @if($resources->total() > 0)
                     @php
-                        $pageFavs = $resources->filter(fn($r) => ($r->favorited_by_count ?? 0) > 0)->count();
+                        $totalFavs = $resources->total_favorited ?? $resources->filter(fn($r) => ($r->favorited_by_count ?? 0) > 0)->count();
                     @endphp
                     <p class="text-xs text-slate-400 mt-1">
                         Encontrado <strong class="text-indigo-300">{{ $resources->total() }}</strong> recursos.
-                        @if($pageFavs > 0)
-                            <strong class="text-amber-400">{{ $pageFavs }}</strong> favoritos.
+                        @if($totalFavs > 0)
+                            <strong class="text-amber-400">{{ $totalFavs }}</strong> favoritos.
                         @endif
                     </p>
                 @else
