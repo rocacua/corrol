@@ -24,6 +24,7 @@
 Los directores de juego (*Game Masters*) y entusiastas de los juegos de rol (como *RuneQuest*, *Dungeons & Dragons*, *La Llamada de Cthulhu* o *Juego de Dioses*) suelen enfrentarse al problema del contenido fragmentado: hojas de personaje en libretas, manuales en PDF, notas de sesión en procesadores de texto, mapas dispersos en foros y enlaces externos repartidos por la red.
 
 **CorRol** nace para dar soporte directo a la comunidad rolera, ofreciendo un entorno centralizado, intuitivo y moderno donde organizar, consultar, crear y compartir recursos de rol sin fricción. La plataforma permite tanto el uso colaborativo abierto como la gestión privada de campañas personales, combinando la subida de archivos pesados en la nube con herramientas de creación interactiva en el navegador.
+Más allá de la gestión de manuales y hojas de personaje, CorRol abraza la narrativa visual del rol integrando un visor interactivo de cómics, pensado para explorar novelas gráficas, lore expandido y material visual que enriquece el trasfondo de las campañas.
 
 **Desarrollador** Ricardo Ocaña Gasco
 
@@ -39,6 +40,7 @@ Los directores de juego (*Game Masters*) y entusiastas de los juegos de rol (com
 
 ### 👓 Visores Multimedia Integrados
 * **Documentos PDF:** Visor con **Mozilla PDF.js** con controles de cambio de página, zoom dinámico y fallback a visor nativo del navegador con barra de miniaturas.
+* **Visor Interactivo de Cómics:** Lector inmersivo optimizado para cómics y novelas gráficas. Incluye controles de zoom dinámico y ofrece soporte de lectura dual: visualización clásica de página completa o modo de "lectura guiada" (navegación secuencial aislando elementos específicos de la página).
 * **Streaming Proxy Seguro:** Transmisión de bytes controlada por backend para evitar restricciones de CORS y validar permisos de privacidad en tiempo real.
 * **Documentos Office:** Integración con visor de Microsoft Office mediante URLs firmadas temporales (`temporaryUrl`) de caducidad automática para documentos privados.
 * **Imágenes, Audio y Video:** Reproductores y visualizadores adaptativos con extracción automática de dimensiones, metadatos y MIME-types.
@@ -47,6 +49,7 @@ Los directores de juego (*Game Masters*) y entusiastas de los juegos de rol (com
 * **📋 Fichas de PNJ / Personajes:** Editor de bloques enriquecidos (**Editor.js**) con soporte de tablas para estadísticas, atributos y plantillas reutilizables.
 * **📖 Diarios de Sesión y Crónicas:** Registro estructurado de eventos de campaña en bloques JSON.
 * **🗺️ Mapas Interactivos:** Soporte con **Leaflet.js** sobre proyecciones planas (`CRS.Simple`). Permite a los usuarios colocar pines interactivos con títulos y descripciones sobre cualquier imagen estática de mapa.
+* **💬 Mapeador de Viñetas (Guided View):** Herramienta visual de edición que permite a los usuarios trazar las coordenadas de las viñetas (mediante recortes poligonales o rectangulares) sobre las páginas de un cómic. Estos metadatos se almacenan en formato JSON, permitiendo al visor recortar y enfocar dinámicamente cada viñeta en pantalla utilizando `clip-path`.
 * **Plantillas Rápidas:** Barra lateral con historial de creaciones anteriores del usuario para clonar o editar con un solo clic.
 
 ### 🔍 Búsqueda y Navegación Multifiltro
@@ -217,7 +220,7 @@ Si despliegas CorRol bajo Apache en un entorno local de desarrollo (por ejemplo 
 
 Todas las tablas utilizan el prefijo configurable `cr_` para convivir de forma aislada en entornos de hosting compartido:
 
-* **`cr_resources`**: Tabla principal polimórfica (título, descripción, privacidad, tipo, juego, campaña, autor, etiquetas JSON, relaciones `resourceable`).
+* **`cr_resources`**: Tabla principal polimórfica (título, descripción, privacidad, tipo, juego, campaña, autor, etiquetas JSON, metadatos de cómic interactivo, relaciones `resourceable`).
 * **`cr_resource_files`**: Registros de ficheros (ruta/URL, peso, MIME-type, si es externo, árbol JSON de ZIPs y dimensiones de imagen).
 * **`cr_resource_sheets`**: Fichas de personaje, diarios y campañas en formato JSON estructurado (Editor.js).
 * **`cr_resource_maps`**: Mapas interactivos (URL de imagen base y array JSON de pines X/Y con descripciones).
