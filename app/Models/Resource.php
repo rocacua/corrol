@@ -27,6 +27,7 @@ class Resource extends Model
 
     protected $casts = [
         'tags' => 'array',
+        'comic_metadata' => 'array',
     ];
 
     /**
@@ -52,4 +53,11 @@ class Resource extends Model
         if (!$user) return false;
         return $this->favoritedBy()->where('user_id', $user->id)->exists();
     }
+
+    // Helper para saber si es un cómic (Clean Code)
+    public function isComic(): bool
+    {
+        return !empty($this->comic_metadata);
+    }
+    
 }

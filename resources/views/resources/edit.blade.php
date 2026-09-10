@@ -35,6 +35,38 @@
         </div>
     @endif
 
+    @php
+        $isPdf = $resource->type === 'pdf' 
+            || ($resource->type === 'file' 
+                && $resource->resourceable 
+                && ($resource->resourceable->file_type === 'pdf' 
+                    || str_ends_with(strtolower(parse_url($resource->resourceable->file_path_or_url ?? '', PHP_URL_PATH) ?? ''), '.pdf')));
+    @endphp
+    @if($isPdf)
+        <div class="p-4 bg-slate-900 border border-slate-700 rounded-lg shadow-inner my-6">
+            @if($resource->isComic())
+                <h3 class="text-lg font-bold text-indigo-400">Este recurso es un Cómic Interactivo</h3>
+                <div class="mt-3 flex space-x-4">
+                    <a href="{{ route('comic.mapper.edit', $resource) }}" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                        ✏️ Editar viñetas
+                    </a>
+                    
+                    <form action="{{ route('comic.metadata.destroy', $resource) }}" method="POST" onsubmit="return confirm('¿Cambio irreversible! ¿Convertir a PDF normal?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                            🗑️ Eliminar todas las viñetas
+                        </button>
+                    </form>
+                </div>
+            @else
+                <a href="{{ route('comic.mapper.edit', $resource) }}" class="inline-block bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-4 rounded-lg transition text-sm shadow">
+                    🦸 Convertir en cómic (Añadir viñetas)
+                </a>
+            @endif
+        </div>
+    @endif
+
      <form action="{{ route('resources.update', $resource->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         @method('PUT')

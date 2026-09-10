@@ -10,10 +10,11 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\SheetController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\ComicMetadataController;
 
-Route::get('/', function () {
-    return redirect()->route('resources.index');
-});
+// Route::get('/', function () {
+//     return redirect()->route('resources.index');
+// });
 
 // Rutas de Autenticación
 Route::middleware('guest')->group(function () {
@@ -174,3 +175,31 @@ Route::middleware(['auth', 'admin'])->prefix('secret-admin-panel')->group(functi
 
 // En lugar de redireccionar con redirect():
 Route::get('/', [ResourceController::class, 'index'])->name('home');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/resources/{resource}/comic-stream', [ComicMetadataController::class, 'streamComic'])->name('comic.stream');
+    Route::get('/resources/{resource}/comic-mapper', [ComicMetadataController::class, 'edit'])->name('comic.mapper.edit');
+    Route::put('/resources/{resource}/comic-metadata', [ComicMetadataController::class, 'update'])->name('comic.metadata.update');
+    Route::delete('/resources/{resource}/comic-metadata', [ComicMetadataController::class, 'destroy'])->name('comic.metadata.destroy');
+});
+
+Route::get('/resources/{resource}/proxy-stream', function (\App\Models\Resource $resource) {
+    if ($resource->privacy === 'private' && $resource->user_id !== auth()->id()) {
+        abort(403);
+    }
+    $resourceFile = $resource->resourceable;
+    if (!$resourceFile) {
+        abort(404);
+    }
+    if ($resourceFile->is_external) {
+        $response = \Illuminate\Support\Facades\Http::withoutVerifying()->get($resourceFile->file_path_or_url);
+        if (!$response->successful()) {
+            abort(404, 'No se pudo obtener el archivo externo.');
+        }
+        return response($response->body(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="document.pdf"',
+        ]);
+    }
+    return app(\App\Services\ResourceUploadService::class)->streamFile($resource);
+})->name('resources.proxy-stream');

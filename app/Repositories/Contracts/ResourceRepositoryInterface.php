@@ -22,4 +22,5 @@ interface ResourceRepositoryInterface
     public function toggleFavorite(int $userId, int $resourceId): bool;
     public function isFavorited(int $userId, int $resourceId): bool;
     public function getFavoriteResources(int $targetUserId, ?int $viewerUserId = null, array $filters = []): mixed;
+    public function updateComicMetadata(int $id, ?array $metadata): bool;
 }

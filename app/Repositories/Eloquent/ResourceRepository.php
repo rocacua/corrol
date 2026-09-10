@@ -354,4 +354,11 @@ class ResourceRepository implements ResourceRepositoryInterface
 
         return $query->paginate(12)->withQueryString();
     }
+
+    public function updateComicMetadata(int $id, ?array $metadata): bool
+    {
+        $resource = $this->findById($id);
+        $resource->comic_metadata = $metadata;
+        return $resource->save();
+    }
 }
